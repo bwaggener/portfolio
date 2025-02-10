@@ -35,7 +35,7 @@ ideal_society_real_data <- ideal_society %>%
   
 ```
 
-Removing one response from the data because their free response was not thoughtful enought. 
+Removing one response from the data because their free response was not thoughtful enough. 
 ```{r cleaningdata_3}
 ideal_society_clean <- ideal_society_real_data %>%
   filter(Q127 != 5)
