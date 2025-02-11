@@ -47,7 +47,7 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget nibh ve
 
 Mauris in ligula mauris. Curabitur facilisis pharetra metus eget lobortis. In egestas nibh sit amet faucibus eleifend. Suspendisse imperdiet viverra blandit. Phasellus consectetur tincidunt eros eu facilisis. Quisque maximus, orci eget sodales aliquam, velit lorem semper dolor, nec convallis erat ipsum mattis velit. Pellentesque porttitor, mauris vitae aliquam mattis, metus nisl viverra turpis, vel convallis metus sapien et ex. Nunc consequat ipsum id dolor eleifend, sit amet semper eros sodales. Pellentesque consectetur, dui quis venenatis malesuada, nunc lorem lacinia libero, vitae malesuada dui arcu in augue. Aliquam id sagittis libero. Vestibulum aliquet sagittis libero, non posuere odio molestie ut. Curabitur lacus enim, viverra vel odio non, pretium efficitur elit. Mauris posuere efficitur interdum. Nunc sed bibendum turpis, quis fringilla velit. Phasellus eu lorem lobortis eros molestie laoreet.
 
-```{r violinplot_duration}
+```{r plot_duration}
 
 ideal_society_clean <- ideal_society_clean %>%
   mutate(Duration..in.seconds. = as.numeric(Duration..in.seconds.))
@@ -61,35 +61,27 @@ ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
 
 ```
 
-```{r}
-# Create a barplot of the number of fish encounters by species
-ggplot(ideal_society_clean, aes(y= ) = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Species", y = "Number of Fish Encounters")#
+```{r poli_ori_duration_corr}
+
+ideal_society_clean <- ideal_society_clean %>%
+  mutate(Q2 = as.numeric(Q2))
+
+ggplot(ideal_society_clean, aes(x = Q2, y = Duration..in.seconds.)) +
+  geom_point(alpha = 0.6, color = "blue") +  
+  geom_smooth(method = "lm", se = TRUE, color = "red") + 
+  labs(title = "Correlation Between Political Orientation and Duration to Complete Survey",
+       x = "Political Orientation (1 liberal-11 conservative)", y = "Duration (seconds)") +
+  theme_minimal()
   
 ```
 
 
-Sed mollis purus faucibus leo finibus, ut pharetra nibh elementum. Nulla id orci lorem. Mauris sollicitudin mi eget tellus vehicula, ut convallis lorem mollis. In blandit nulla diam, a malesuada sem volutpat interdum. Ut elementum elit at velit maximus, ac tempor odio porttitor. Suspendisse lobortis sollicitudin tortor, ut pharetra libero luctus a. Sed hendrerit faucibus metus. Sed rutrum purus vel pellentesque euismod.
 
-
-```{r}
-# Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Species", y = "Number of Fish Encounters")
-  
-```
-
-Mauris placerat in velit a pharetra. Nulla viverra bibendum lectus, ut lobortis nibh. Aenean malesuada, orci vitae dictum placerat, enim justo aliquet leo, ac tincidunt augue ipsum et mi. Nullam in pharetra metus, nec molestie felis. Duis varius rhoncus pulvinar. Integer semper urna sed tellus rhoncus, vel suscipit odio iaculis. Mauris iaculis neque pellentesque ex convallis venenatis. Sed ultrices euismod fermentum. Ut feugiat risus at turpis tincidunt viverra.
 
 
 ```{r}
-# Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
-  geom_bar(stat = "identity") +
-  labs(x = "Species", y = "Number of Fish Encounters")
-  
+
+cor(ideal_society_clean$Duration..in.seconds.,ideal_society_clean$Q2)
+
 ```
 
-Donec sagittis suscipit orci in ultrices. Vivamus iaculis eleifend est et dictum. Fusce non urna at lacus dapibus tincidunt ac sed nibh. Donec luctus lectus elit, ac ultrices tortor mollis sit amet. Nulla finibus lacinia arcu. Proin sollicitudin non odio et pulvinar. Maecenas finibus faucibus finibus. Ut elementum metus velit, a sodales sapien commodo et. Vivamus pulvinar, sapien et porta cursus, elit est luctus nisi, eget fringilla odio diam et enim. Sed sodales suscipit bibendum. Morbi ut metus semper, laoreet felis sodales, consequat dolor.
