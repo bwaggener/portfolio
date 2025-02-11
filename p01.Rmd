@@ -19,7 +19,7 @@ ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSo
 ```
 
 
-Changing the format of the StartDate variable to POSIX
+Changing the format of the StartDate variable to POSIX because apparently I need to. 
 ```{r cleaningdata_1}
 ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
 
@@ -35,7 +35,7 @@ ideal_society_real_data <- ideal_society %>%
   
 ```
 
-Removing one response from the data because their free response was not thoughtful enough. They just wrote "5" for our question asking what they would like to see happen in washington.
+Removing one response from the data because their free response was not thoughtful enough. They just wrote "5" for our question asking what they would like to see happen in washington. Not cool.
 
 ```{r cleaningdata_3}
 ideal_society_clean <- ideal_society_real_data %>%
@@ -43,9 +43,7 @@ ideal_society_clean <- ideal_society_real_data %>%
 ```
 
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget nibh vel est aliquet iaculis at placerat sem. Aenean faucibus iaculis ultricies. Nullam consequat odio in ultricies ullamcorper. Etiam venenatis in est vitae ullamcorper. Nam vitae urna ut dolor rhoncus aliquet at vel neque. Quisque tristique leo finibus nisi interdum, sit amet tempor risus viverra. Donec mollis vulputate sodales. Nunc ornare, leo quis euismod eleifend, eros mi maximus felis, vel varius lacus dui eget nibh. Duis vitae nunc nisl. Donec accumsan aliquam elit, eu fringilla quam pulvinar eget.
-
-Mauris in ligula mauris. Curabitur facilisis pharetra metus eget lobortis. In egestas nibh sit amet faucibus eleifend. Suspendisse imperdiet viverra blandit. Phasellus consectetur tincidunt eros eu facilisis. Quisque maximus, orci eget sodales aliquam, velit lorem semper dolor, nec convallis erat ipsum mattis velit. Pellentesque porttitor, mauris vitae aliquam mattis, metus nisl viverra turpis, vel convallis metus sapien et ex. Nunc consequat ipsum id dolor eleifend, sit amet semper eros sodales. Pellentesque consectetur, dui quis venenatis malesuada, nunc lorem lacinia libero, vitae malesuada dui arcu in augue. Aliquam id sagittis libero. Vestibulum aliquet sagittis libero, non posuere odio molestie ut. Curabitur lacus enim, viverra vel odio non, pretium efficitur elit. Mauris posuere efficitur interdum. Nunc sed bibendum turpis, quis fringilla velit. Phasellus eu lorem lobortis eros molestie laoreet.
+Here's a plot showing a distribution of participants survey response durations. Practicing visualizing data!
 
 ```{r plot_duration}
 
@@ -53,35 +51,19 @@ ideal_society_clean <- ideal_society_clean %>%
   mutate(Duration..in.seconds. = as.numeric(Duration..in.seconds.))
 
 ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
-  geom_histogram(binwidth = 20, fill = "blue", color = "black") +
+  geom_histogram(binwidth = 25, fill = "blue", color = "black") +
   labs(title = "Distribution of Duration", x = "Duration (seconds)", y = "Frequency") +
   theme_minimal()
 
 
 
 ```
+Checking for any outliers. According to Prolific, we don't have to pay anyone who is three SD below the mean.
+```{r outliers}
 
-```{r poli_ori_duration_corr}
-
-ideal_society_clean <- ideal_society_clean %>%
-  mutate(Q2 = as.numeric(Q2))
-
-ggplot(ideal_society_clean, aes(x = Q2, y = Duration..in.seconds.)) +
-  geom_point(alpha = 0.6, color = "blue") +  
-  geom_smooth(method = "lm", se = TRUE, color = "red") + 
-  labs(title = "Correlation Between Political Orientation and Duration to Complete Survey",
-       x = "Political Orientation (1 liberal-11 conservative)", y = "Duration (seconds)") +
-  theme_minimal()
-  
-```
-
-
-
-
-
-```{r}
-
-cor(ideal_society_clean$Duration..in.seconds.,ideal_society_clean$Q2)
+z_score_duration <- scale(ideal_society_clean$Duration..in.seconds.)
+ideal_society_clean$outlier <- abs(z_score_duration) > 3
 
 ```
 
+This checked for outliers based on duration it took to complete the survey and while there were three participants where their duration was farther than 3 standard deviations from the mean, they were all greater than the mean and we are more concerned with people speeding thorugh the suvey than taking a longer time. 

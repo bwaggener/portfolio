@@ -305,7 +305,8 @@ and of high quality in terms of writing, grammar, presentation, etc.</p>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)</code></pre>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)</code></pre>
-<p>Changing the format of the StartDate variable to POSIX</p>
+<p>Changing the format of the StartDate variable to POSIX because
+apparently I need to.</p>
 <pre class="r"><code>ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)</code></pre>
 <p>Filtering out responses that were not collected through
 Prolific.These were tests of the survey that qualtrics includes in the
@@ -315,53 +316,28 @@ final data export.</p>
   filter(Progress != 14)</code></pre>
 <p>Removing one response from the data because their free response was
 not thoughtful enough. They just wrote “5” for our question asking what
-they would like to see happen in washington.</p>
+they would like to see happen in washington. Not cool.</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_real_data %&gt;%
   filter(Q127 != 5)</code></pre>
-<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum
-eget nibh vel est aliquet iaculis at placerat sem. Aenean faucibus
-iaculis ultricies. Nullam consequat odio in ultricies ullamcorper. Etiam
-venenatis in est vitae ullamcorper. Nam vitae urna ut dolor rhoncus
-aliquet at vel neque. Quisque tristique leo finibus nisi interdum, sit
-amet tempor risus viverra. Donec mollis vulputate sodales. Nunc ornare,
-leo quis euismod eleifend, eros mi maximus felis, vel varius lacus dui
-eget nibh. Duis vitae nunc nisl. Donec accumsan aliquam elit, eu
-fringilla quam pulvinar eget.</p>
-<p>Mauris in ligula mauris. Curabitur facilisis pharetra metus eget
-lobortis. In egestas nibh sit amet faucibus eleifend. Suspendisse
-imperdiet viverra blandit. Phasellus consectetur tincidunt eros eu
-facilisis. Quisque maximus, orci eget sodales aliquam, velit lorem
-semper dolor, nec convallis erat ipsum mattis velit. Pellentesque
-porttitor, mauris vitae aliquam mattis, metus nisl viverra turpis, vel
-convallis metus sapien et ex. Nunc consequat ipsum id dolor eleifend,
-sit amet semper eros sodales. Pellentesque consectetur, dui quis
-venenatis malesuada, nunc lorem lacinia libero, vitae malesuada dui arcu
-in augue. Aliquam id sagittis libero. Vestibulum aliquet sagittis
-libero, non posuere odio molestie ut. Curabitur lacus enim, viverra vel
-odio non, pretium efficitur elit. Mauris posuere efficitur interdum.
-Nunc sed bibendum turpis, quis fringilla velit. Phasellus eu lorem
-lobortis eros molestie laoreet.</p>
+<p>Here’s a plot showing a distribution of participants survey response
+durations. Practicing visualizing data!</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   mutate(Duration..in.seconds. = as.numeric(Duration..in.seconds.))
 
 ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
-  geom_histogram(binwidth = 20, fill = &quot;blue&quot;, color = &quot;black&quot;) +
+  geom_histogram(binwidth = 25, fill = &quot;blue&quot;, color = &quot;black&quot;) +
   labs(title = &quot;Distribution of Duration&quot;, x = &quot;Duration (seconds)&quot;, y = &quot;Frequency&quot;) +
   theme_minimal()</code></pre>
-<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" /></p>
-<pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
-  mutate(Q2 = as.numeric(Q2))
-
-ggplot(ideal_society_clean, aes(x = Q2, y = Duration..in.seconds.)) +
-  geom_point(alpha = 0.6, color = &quot;blue&quot;) +  
-  geom_smooth(method = &quot;lm&quot;, se = TRUE, color = &quot;red&quot;) + 
-  labs(title = &quot;Correlation Between Political Orientation and Duration to Complete Survey&quot;,
-       x = &quot;Political Orientation (1 liberal-11 conservative)&quot;, y = &quot;Duration (seconds)&quot;) +
-  theme_minimal()</code></pre>
-<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
-<p><img src="p01_files/figure-html/poli_ori_duration_corr-1.png" width="672" /></p>
-<pre class="r"><code>cor(ideal_society_clean$Duration..in.seconds.,ideal_society_clean$Q2)</code></pre>
-<pre><code>## [1] 0.1206867</code></pre>
+<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" />
+Checking for any outliers. According to Prolific, we don’t have to pay
+anyone who is three SD below the mean.</p>
+<pre class="r"><code>z_score_duration &lt;- scale(ideal_society_clean$Duration..in.seconds.)
+ideal_society_clean$outlier &lt;- abs(z_score_duration) &gt; 3</code></pre>
+<p>This checked for outliers based on duration it took to complete the
+survey and while there were three participants where their duration was
+farther than 3 standard deviations from the mean, they were all greater
+than the mean and we are more concerned with people speeding thorugh the
+suvey than taking a longer time.</p>
 
 
 
