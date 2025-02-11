@@ -52,13 +52,15 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
   geom_histogram(binwidth = 25, fill = "blue", color = "black") +
-  labs(title = "Distribution of Duration", x = "Duration (seconds)", y = "Frequency") +
+  labs(title = "Distribution of Duration", x = "Duration (in seconds)", y = "Frequency") +
   theme_minimal()
 
 
 
 ```
+
 Checking for any outliers. According to Prolific, we don't have to pay anyone who is three SD below the mean.
+
 ```{r outliers}
 
 z_score_duration <- scale(ideal_society_clean$Duration..in.seconds.)
@@ -66,4 +68,6 @@ ideal_society_clean$outlier <- abs(z_score_duration) > 3
 
 ```
 
-This checked for outliers based on duration it took to complete the survey and while there were three participants where their duration was farther than 3 standard deviations from the mean, they were all greater than the mean and we are more concerned with people speeding thorugh the suvey than taking a longer time. 
+This checked for outliers based on duration it took to complete the survey and while there were three participants where their duration was farther than 3 standard deviations from the mean, they were all greater than the mean and we are more concerned with people speeding through the suvey than taking a longer time. 
+
+This cleaned dataset is ready to be used in my analysis!! WHOOOOO!
