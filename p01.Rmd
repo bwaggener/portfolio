@@ -58,7 +58,16 @@ ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
 
 
 ```
+```{r violinplot}
 
+ggplot(ideal_society_clean, aes(x = "", y = Duration..in.seconds.)) +
+  geom_violin(fill = "blue", color = "black") +
+  geom_boxplot(width = 0.2, color = "black", outlier.shape = 4)+
+  labs(title = "Distribution of Duration", x = "", y = "Duration (in seconds)") +
+  theme_minimal()
+
+
+```
 Checking for any outliers. According to Prolific, we don't have to pay anyone who is three SD below the mean.
 
 ```{r outliers}
