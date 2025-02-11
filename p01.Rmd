@@ -14,7 +14,7 @@ library(tidyr)
 
 ```{r getdata}
 
-ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
+ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
 
 ```
 

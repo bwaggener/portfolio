@@ -304,7 +304,7 @@ and of high quality in terms of writing, grammar, presentation, etc.</p>
 </blockquote>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)</code></pre>
-<pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)</code></pre>
+<pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)</code></pre>
 <p>Changing the format of the StartDate variable to POSIX because
 apparently I need to.</p>
 <pre class="r"><code>ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)</code></pre>
@@ -329,8 +329,14 @@ ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
   labs(title = &quot;Distribution of Duration&quot;, x = &quot;Duration (in seconds)&quot;, y = &quot;Frequency&quot;) +
   theme_minimal()</code></pre>
 <p><img src="p01_files/figure-html/plot_duration-1.png" width="672" /></p>
-<p>Checking for any outliers. According to Prolific, we don’t have to
-pay anyone who is three SD below the mean.</p>
+<pre class="r"><code>ggplot(ideal_society_clean, aes(x = &quot;&quot;, y = Duration..in.seconds.)) +
+  geom_violin(fill = &quot;blue&quot;, color = &quot;black&quot;) +
+  geom_boxplot(width = 0.2, color = &quot;black&quot;, outlier.shape = 4)+
+  labs(title = &quot;Distribution of Duration&quot;, x = &quot;&quot;, y = &quot;Duration (in seconds)&quot;) +
+  theme_minimal()</code></pre>
+<p><img src="p01_files/figure-html/violinplot-1.png" width="672" />
+Checking for any outliers. According to Prolific, we don’t have to pay
+anyone who is three SD below the mean.</p>
 <pre class="r"><code>z_score_duration &lt;- scale(ideal_society_clean$Duration..in.seconds.)
 ideal_society_clean$outlier &lt;- abs(z_score_duration) &gt; 3</code></pre>
 <p>This checked for outliers based on duration it took to complete the
