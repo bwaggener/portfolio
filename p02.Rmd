@@ -13,9 +13,12 @@ library(tidyr)
 This repeats what I did in portfolio 1.
 
 ```{r getting_cleaneddata}
-ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
+ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
 
 ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+```
+
+```{r gettingdata2}
 
 ideal_society_real_data <- ideal_society %>%
   filter(as.Date(StartDate)=="2025-01-28") %>%
@@ -28,4 +31,6 @@ ideal_society_clean <- ideal_society_real_data %>%
 
 Now I need to add political orientaiton data
 
-```{r }
+```{r screams}
+
+
