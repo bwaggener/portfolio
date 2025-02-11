@@ -2,4 +2,30 @@
 title: "Portfolio 2"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+
+
+```{r load-packages, message=FALSE}
+library(tidyverse) 
+library(tidyr)
+
+```
+
+This repeats what I did in portfolio 1.
+
+```{r getting_cleaneddata}
+ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
+
+ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+ideal_society_real_data <- ideal_society %>%
+  filter(as.Date(StartDate)=="2025-01-28") %>%
+  filter(Progress != 14)
+
+ideal_society_clean <- ideal_society_real_data %>%
+  filter(Q127 != 5)
+
+```
+
+Now I need to add political orientaiton data
+
+```{r }
