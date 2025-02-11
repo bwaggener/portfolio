@@ -326,18 +326,20 @@ durations. Practicing visualizing data!</p>
 
 ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
   geom_histogram(binwidth = 25, fill = &quot;blue&quot;, color = &quot;black&quot;) +
-  labs(title = &quot;Distribution of Duration&quot;, x = &quot;Duration (seconds)&quot;, y = &quot;Frequency&quot;) +
+  labs(title = &quot;Distribution of Duration&quot;, x = &quot;Duration (in seconds)&quot;, y = &quot;Frequency&quot;) +
   theme_minimal()</code></pre>
-<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" />
-Checking for any outliers. According to Prolific, we don’t have to pay
-anyone who is three SD below the mean.</p>
+<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" /></p>
+<p>Checking for any outliers. According to Prolific, we don’t have to
+pay anyone who is three SD below the mean.</p>
 <pre class="r"><code>z_score_duration &lt;- scale(ideal_society_clean$Duration..in.seconds.)
 ideal_society_clean$outlier &lt;- abs(z_score_duration) &gt; 3</code></pre>
 <p>This checked for outliers based on duration it took to complete the
 survey and while there were three participants where their duration was
 farther than 3 standard deviations from the mean, they were all greater
-than the mean and we are more concerned with people speeding thorugh the
+than the mean and we are more concerned with people speeding through the
 suvey than taking a longer time.</p>
+<p>This cleaned dataset is ready to be used in my analysis!!
+WHOOOOO!</p>
 
 
 
