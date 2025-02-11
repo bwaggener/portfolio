@@ -26,7 +26,7 @@ ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d 
 ```
 
 
-Filtering out responses that were not collected through Prolific.
+Filtering out responses that were not collected through Prolific.These were tests of the survey that qualtrics includes in the final data export.
 ``` {r cleaningdata_2}
 
 ideal_society_real_data <- ideal_society %>%
@@ -35,7 +35,8 @@ ideal_society_real_data <- ideal_society %>%
   
 ```
 
-Removing one response from the data because their free response was not thoughtful enough. 
+Removing one response from the data because their free response was not thoughtful enough. They just wrote "5" for our question asking what they would like to see happen in washington.
+
 ```{r cleaningdata_3}
 ideal_society_clean <- ideal_society_real_data %>%
   filter(Q127 != 5)
@@ -46,13 +47,25 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum eget nibh ve
 
 Mauris in ligula mauris. Curabitur facilisis pharetra metus eget lobortis. In egestas nibh sit amet faucibus eleifend. Suspendisse imperdiet viverra blandit. Phasellus consectetur tincidunt eros eu facilisis. Quisque maximus, orci eget sodales aliquam, velit lorem semper dolor, nec convallis erat ipsum mattis velit. Pellentesque porttitor, mauris vitae aliquam mattis, metus nisl viverra turpis, vel convallis metus sapien et ex. Nunc consequat ipsum id dolor eleifend, sit amet semper eros sodales. Pellentesque consectetur, dui quis venenatis malesuada, nunc lorem lacinia libero, vitae malesuada dui arcu in augue. Aliquam id sagittis libero. Vestibulum aliquet sagittis libero, non posuere odio molestie ut. Curabitur lacus enim, viverra vel odio non, pretium efficitur elit. Mauris posuere efficitur interdum. Nunc sed bibendum turpis, quis fringilla velit. Phasellus eu lorem lobortis eros molestie laoreet.
 
+```{r violinplot_duration}
 
+ideal_society_clean <- ideal_society_clean %>%
+  mutate(Duration..in.seconds. = as.numeric(Duration..in.seconds.))
+
+ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
+  geom_histogram(binwidth = 20, fill = "blue", color = "black") +
+  labs(title = "Distribution of Duration", x = "Duration (seconds)", y = "Frequency") +
+  theme_minimal()
+
+
+
+```
 
 ```{r}
 # Create a barplot of the number of fish encounters by species
-ggplot(data = fish_encounters, aes(x = station, y = seen)) +
+ggplot(ideal_society_clean, aes(y= ) = fish_encounters, aes(x = station, y = seen)) +
   geom_bar(stat = "identity") +
-  labs(x = "Species", y = "Number of Fish Encounters")
+  labs(x = "Species", y = "Number of Fish Encounters")#
   
 ```
 
