@@ -32,5 +32,11 @@ ideal_society_clean <- ideal_society_real_data %>%
 Now I need to add political orientaiton data
 
 ```{r screams}
+politicalorientation_data <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv")
 
+ideal_society_clean <- ideal_society_clean %>%
+  left_join(politicalorientation_data, by = "PROLIFIC_PID")
+
+glimpse(ideal_society_clean)
+```
 
