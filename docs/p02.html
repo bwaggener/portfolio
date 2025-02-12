@@ -13,7 +13,7 @@
 
 <title>Portfolio 2</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,39 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<pre class="r"><code>library(tidyverse) 
+library(tidyr)</code></pre>
+<p>This repeats what I did in portfolio 1.</p>
+<pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
+
+ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)</code></pre>
+<pre class="r"><code>ideal_society_real_data &lt;- ideal_society %&gt;%
+  filter(as.Date(StartDate)==&quot;2025-01-28&quot;) %&gt;%
+  filter(Progress != 14)
+
+ideal_society_clean &lt;- ideal_society_real_data %&gt;%
+  filter(Q127 != 5)</code></pre>
+<p>Now I need to add political orientaiton data</p>
+<pre class="r"><code>politicalorientation_data &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv&quot;)
+
+ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  left_join(politicalorientation_data, by = &quot;PROLIFIC_PID&quot;)</code></pre>
+<pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  rename (poli_ori = PROLIFIC_Political.spectrum..us.)</code></pre>
+<pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  rename(LILH = Q7) %&gt;%
+  rename(LIHH = Q4) %&gt;%
+  rename(HILH = Q6) %&gt;%
+  rename(HIHH = Q5) %&gt;%
+  rename(LTLH = Q8) %&gt;%
+  rename(LTHH = Q124) %&gt;%
+  rename(HTLH = Q125) %&gt;%
+  rename(HTHH = Q126) %&gt;%
+  rename(LRLH = Q137) %&gt;%
+  rename(LRHH = Q139) %&gt;%
+  rename(HRLH = Q140) %&gt;%
+  rename(HRHH = Q141)</code></pre>
+<p>```</p>
 
 
 
