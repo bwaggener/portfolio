@@ -11,6 +11,7 @@ library(tidyr)
 library(dplyr)
 library(lme4)
 library(MuMIn)
+library(lmerTest)
 
 ```
 
@@ -98,6 +99,8 @@ ideal_society_simplified <- ideal_society_simplified %>%
 
 ```
 
+This averages the political orientation data and makes a new dataset.
+
 ```{r newdataset}
 
 ideal_society_avrgpoli <- ideal_society_simplified %>%
@@ -113,7 +116,7 @@ ideal_society_avrgpoli <- ideal_society_simplified %>%
 
 ```
 
-Now to go from wide to long
+
 
 ```{r pain}
 ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
@@ -121,7 +124,7 @@ mutate(Subject = row_number())
 
 ```
 
-Here i transformed the data from wide to long and recoded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional- (HF) are coded as 1. 
+Here i transformed the data from wide to longe and recoded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the one that might violate conservative values.
 
 ```{r }
 long_ideal_society <- ideal_society_avrgpoli %>%
