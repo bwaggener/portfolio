@@ -300,7 +300,9 @@ data i collected for my thesis project. I think i may break this up into
 several portfolios eventually but i need this all here for now.</p>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)
-library(dplyr)</code></pre>
+library(dplyr)
+library(lme4)
+library(MuMIn)</code></pre>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
 
 ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)
@@ -336,7 +338,8 @@ ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(HRHH = Q141)</code></pre>
 <p>Next i want to remove variables I don’t need for my analysis. That
 includes everything except for the sociaty ratings (“LFLH” and so on)
-and the political ideology measures</p>
+and the political ideology measures. I am taking out the immigration
+societies to simplify it further.</p>
 <pre class="r"><code>ideal_society_simplified &lt;- ideal_society_clean %&gt;%
   select(LFLH,
          LFHH,
@@ -363,6 +366,9 @@ ideal_society_simplified &lt;- ideal_society_simplified %&gt;%
   mutate(z_pol_part_pref = scale(Q26)) %&gt;%
   mutate(z_econ_descr = scale(Q27)) %&gt;%
   mutate(z_soc_iss = scale(Q28))</code></pre>
+<p>Here i am making a new variable that is an average of the z scored
+political orientation variables. The goal of this is to use it as a
+predictor in the regression.</p>
 <pre class="r"><code>ideal_society_simplified &lt;- ideal_society_simplified %&gt;%  
   mutate(avrg_pol_score = rowMeans(select(ideal_society_simplified, z_pol_ori, z_pol_part_pref, z_econ_descr, z_soc_iss), na.rm = TRUE))</code></pre>
 <pre class="r"><code>ideal_society_avrgpoli &lt;- ideal_society_simplified %&gt;%
@@ -378,6 +384,9 @@ ideal_society_simplified &lt;- ideal_society_simplified %&gt;%
 <p>Now to go from wide to long</p>
 <pre class="r"><code>ideal_society_avrgpoli &lt;- ideal_society_avrgpoli %&gt;%
 mutate(Subject = row_number())</code></pre>
+<p>Here i transformed the data from wide to long and recoded the
+societies so that those with nontraditional family values (LF) are coded
+as 0 and traditional- (HF) are coded as 1.</p>
 <pre class="r"><code>long_ideal_society &lt;- ideal_society_avrgpoli %&gt;%
  pivot_longer(
     cols = c(LFLH, LFHH, HFLH, HFHH, LRLH, LRHH, HRLH, HRHH),
@@ -393,38 +402,100 @@ mutate(Subject = row_number())</code></pre>
                        ifelse(str_detect(Rating_Type, &quot;HH&quot;), 1, NA))
   ) %&gt;%
   select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score)</code></pre>
-<pre class="r"><code># Run the regression model with both two-way and three-way interactions
-family_model &lt;- lm(Society_Rating ~ avrg_pol_score * Happiness * Family_Values, data = long_ideal_society %&gt;%
-              filter(!is.na(Family_Values)))
-  
+<pre class="r"><code>long_ideal_society$Society_Rating &lt;- as.numeric(long_ideal_society$Society_Rating)
 
 
-summary(family_model)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = Society_Rating ~ avrg_pol_score * Happiness * Family_Values, 
-##     data = long_ideal_society %&gt;% filter(!is.na(Family_Values)))
+
+family_mixedmodel &lt;- lmer(Society_Rating ~ avrg_pol_score * Happiness * Family_Values + 
+                          (1 | Subject), 
+                          data = long_ideal_society %&gt;% filter(!is.na(Family_Values)))</code></pre>
+<pre><code>## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre class="r"><code>summary(family_mixedmodel)</code></pre>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: Society_Rating ~ avrg_pol_score * Happiness * Family_Values +  
+##     (1 | Subject)
+##    Data: long_ideal_society %&gt;% filter(!is.na(Family_Values))
 ## 
-## Residuals:
+## REML criterion at convergence: 1695.3
+## 
+## Scaled residuals: 
 ##     Min      1Q  Median      3Q     Max 
-## -7.1313 -1.3411  0.0683  1.2749  7.5961 
+## -3.4751 -0.6535  0.0333  0.6213  3.7016 
 ## 
-## Coefficients:
-##                                        Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)                              3.2222     0.2062  15.623  &lt; 2e-16 ***
-## avrg_pol_score                          -0.5205     0.2180  -2.387 0.017457 *  
-## Happiness                                4.9091     0.2917  16.831  &lt; 2e-16 ***
-## Family_Values                            0.0404     0.2917   0.139 0.889899    
-## avrg_pol_score:Happiness                -1.6378     0.3084  -5.312 1.84e-07 ***
-## avrg_pol_score:Family_Values             1.9190     0.3084   6.224 1.26e-09 ***
-## Happiness:Family_Values                 -0.2222     0.4125  -0.539 0.590382    
-## avrg_pol_score:Happiness:Family_Values   1.4621     0.4361   3.353 0.000878 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  Subject  (Intercept) 0.000    0.000   
+##  Residual             4.211    2.052   
+## Number of obs: 396, groups:  Subject, 99
 ## 
-## Residual standard error: 2.052 on 388 degrees of freedom
-## Multiple R-squared:  0.6491, Adjusted R-squared:  0.6428 
-## F-statistic: 102.6 on 7 and 388 DF,  p-value: &lt; 2.2e-16</code></pre>
+## Fixed effects:
+##                                        Estimate Std. Error t value
+## (Intercept)                              3.2222     0.2062  15.623
+## avrg_pol_score                          -0.5205     0.2180  -2.387
+## Happiness                                4.9091     0.2917  16.831
+## Family_Values                            0.0404     0.2917   0.139
+## avrg_pol_score:Happiness                -1.6378     0.3084  -5.312
+## avrg_pol_score:Family_Values             1.9190     0.3084   6.224
+## Happiness:Family_Values                 -0.2222     0.4125  -0.539
+## avrg_pol_score:Happiness:Family_Values   1.4621     0.4361   3.353
+## 
+## Correlation of Fixed Effects:
+##             (Intr) avrg__ Hppnss Fmly_V av__:H a__:F_ Hp:F_V
+## avrg_pl_scr  0.000                                          
+## Happiness   -0.707  0.000                                   
+## Family_Vals -0.707  0.000  0.500                            
+## avrg_pl_s:H  0.000 -0.707  0.000  0.000                     
+## avrg_p_:F_V  0.000 -0.707  0.000  0.000  0.500              
+## Hppnss:Fm_V  0.500  0.000 -0.707 -0.707  0.000  0.000       
+## avr__:H:F_V  0.000  0.500  0.000  0.000 -0.707 -0.707  0.000
+## optimizer (nloptwrap) convergence code: 0 (OK)
+## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
+<pre class="r"><code>r.squaredGLMM(family_mixedmodel)</code></pre>
+<pre><code>##            R2m       R2c
+## [1,] 0.6450637 0.6450637</code></pre>
+<pre class="r"><code>religion_mixedmodel &lt;- lmer(Society_Rating ~ avrg_pol_score * Happiness * Religion + 
+                          (1 | Subject), 
+                          data = long_ideal_society %&gt;% filter(!is.na(Religion)))
+                            
+
+summary(religion_mixedmodel)</code></pre>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: Society_Rating ~ avrg_pol_score * Happiness * Religion + (1 |  
+##     Subject)
+##    Data: long_ideal_society %&gt;% filter(!is.na(Religion))
+## 
+## REML criterion at convergence: 1741.6
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -4.0509 -0.6191  0.0098  0.6241  3.4717 
+## 
+## Random effects:
+##  Groups   Name        Variance Std.Dev.
+##  Subject  (Intercept) 0.06764  0.2601  
+##  Residual             4.67923  2.1632  
+## Number of obs: 396, groups:  Subject, 99
+## 
+## Fixed effects:
+##                                   Estimate Std. Error t value
+## (Intercept)                        3.16162    0.21897  14.439
+## avrg_pol_score                    -0.39798    0.23149  -1.719
+## Happiness                          5.22222    0.30746  16.985
+## Religion                          -0.09091    0.30746  -0.296
+## avrg_pol_score:Happiness          -1.07762    0.32503  -3.315
+## avrg_pol_score:Religion            1.74744    0.32503   5.376
+## Happiness:Religion                -0.85859    0.43481  -1.975
+## avrg_pol_score:Happiness:Religion  0.97468    0.45966   2.120
+## 
+## Correlation of Fixed Effects:
+##             (Intr) avrg__ Hppnss Relign av__:H av__:R Hppn:R
+## avrg_pl_scr  0.000                                          
+## Happiness   -0.702  0.000                                   
+## Religion    -0.702  0.000  0.500                            
+## avrg_pl_s:H  0.000 -0.702  0.000  0.000                     
+## avrg_pl_s:R  0.000 -0.702  0.000  0.000  0.500              
+## Hppnss:Rlgn  0.496  0.000 -0.707 -0.707  0.000  0.000       
+## avrg_p_:H:R  0.000  0.496  0.000  0.000 -0.707 -0.707  0.000</code></pre>
 
 
 
