@@ -295,8 +295,11 @@ $(document).ready(function () {
 </div>
 
 
+<p>The goal of this is to take my cleaned data and make graphs based on
+the means and se of the data. I want to make two graphs for this.</p>
 <pre class="r"><code>library(tidyverse) 
-library(tidyr)</code></pre>
+library(tidyr)
+library(ggplot2)</code></pre>
 <p>This repeats what I did in portfolio 1.</p>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
 
@@ -307,7 +310,7 @@ ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%
 
 ideal_society_clean &lt;- ideal_society_real_data %&gt;%
   filter(Q127 != 5)</code></pre>
-<p>Now I need to add political orientaiton data</p>
+<p>Now I need to add political orientation data</p>
 <pre class="r"><code>politicalorientation_data &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv&quot;)
 
 ideal_society_clean &lt;- ideal_society_clean %&gt;%
@@ -339,19 +342,14 @@ means_and_se &lt;-ideal_society_clean %&gt;%
     LTLH_se = sd(LTLH) / sqrt(n()),
     LTHH_se = sd(LTHH) / sqrt(n())
   )</code></pre>
-<pre class="r"><code># Reshape the data
-long_data &lt;- means_and_se %&gt;%
-  pivot_longer(cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se), 
-               names_to = c(&quot;variable&quot;, &quot;stat&quot;), 
-               names_pattern = &quot;(.*)_(.*)&quot;, 
-               values_to = &quot;value&quot;)</code></pre>
-<pre class="r"><code>ggplot(long_data %&gt;% filter(stat == &quot;mean&quot;), aes(x = variable, y = value, color = poli_ori, group = poli_ori)) +
-  geom_point(size = 3) +
-  geom_line() +
-  labs(y = &quot;Mean Score&quot;, x = &quot;Variables&quot;) +
-  theme_minimal() +
-  scale_x_discrete(labels = c(&quot;LTLH&quot;, &quot;LTHH&quot;))  # Custom labels for x-axis</code></pre>
-<p><img src="p02_files/figure-html/plotting-1.png" width="672" /></p>
+<pre class="r"><code>long_means_and_se &lt;- means_and_se %&gt;%
+  pivot_longer(
+    cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se),
+    names_to = c(&quot;Society_Type&quot;, &quot;Stat&quot;),
+    names_pattern = &quot;(LTLH|LTHH)_(mean|se)&quot;,
+    values_to = &quot;variable_value&quot;
+  )</code></pre>
+<p>```</p>
 
 
 

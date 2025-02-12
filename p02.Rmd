@@ -1,12 +1,13 @@
 ---
 title: "Portfolio 2"
 ---
-
+The goal of this is to take my cleaned data and make graphs based on the means and se of the data. I want to make two graphs for this.
 
 
 ```{r load-packages, message=FALSE}
 library(tidyverse) 
 library(tidyr)
+library(ggplot2)
 
 ```
 
@@ -29,7 +30,7 @@ ideal_society_clean <- ideal_society_real_data %>%
 
 ```
 
-Now I need to add political orientaiton data
+Now I need to add political orientation data
 
 ```{r screams}
 politicalorientation_data <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv")
@@ -83,29 +84,18 @@ means_and_se <-ideal_society_clean %>%
 
 ```
 
-```{r plotting}
+```{r widetolong}
 
-
-```
-
-
-``{r widetolong}
-# Reshape the data
-long_data <- means_and_se %>%
-  pivot_longer(cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se), 
-               names_to = c("variable", "stat"), 
-               names_pattern = "(.*)_(.*)", 
-               values_to = "value")
+long_means_and_se <- means_and_se %>%
+  pivot_longer(
+    cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se),
+    names_to = c("Society_Type", "Stat"),
+    names_pattern = "(LTLH|LTHH)_(mean|se)",
+    values_to = "variable_value"
+  )
 
 ```
 
-``{r plotting}
-ggplot(long_data %>% filter(stat == "mean"), aes(x = variable, y = value, color = poli_ori, group = poli_ori)) +
-  geom_point(size = 3) +
-  geom_line() +
-  labs(y = "Mean Score", x = "Variables") +
-  theme_minimal() +
-  scale_x_discrete(labels = c("LTLH", "LTHH"))  # Custom labels for x-axis
 
 
 
