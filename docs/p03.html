@@ -13,7 +13,7 @@
 
 <title>Portfolio 3</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,87 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<p>The goal of this project is to run a regression analysis on pilot
+data i collected for my thesis project. I think i will break this up
+into several portfolios eventually but i need this all here for now.</p>
+<pre class="r"><code>library(tidyverse) 
+library(tidyr)
+library(dplyr)</code></pre>
+<pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
+
+ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)
+
+
+ideal_society_real_data &lt;- ideal_society %&gt;%
+  filter(as.Date(StartDate)==&quot;2025-01-28&quot;) %&gt;%
+  filter(Progress != 14)
+
+ideal_society_clean &lt;- ideal_society_real_data %&gt;%
+  filter(Q127 != 5)
+
+politicalorientation_data &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv&quot;)
+
+ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  left_join(politicalorientation_data, by = &quot;PROLIFIC_PID&quot;)
+  
+ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  rename (poli_ori = PROLIFIC_Political.spectrum..us.)
+
+ideal_society_clean &lt;- ideal_society_clean %&gt;%
+  rename(LILH = Q7) %&gt;%
+  rename(LIHH = Q4) %&gt;%
+  rename(HILH = Q6) %&gt;%
+  rename(HIHH = Q5) %&gt;%
+  rename(LFLH = Q8) %&gt;%
+  rename(LFHH = Q124) %&gt;%
+  rename(HFLH = Q125) %&gt;%
+  rename(HFHH = Q126) %&gt;%
+  rename(LRLH = Q137) %&gt;%
+  rename(LRHH = Q139) %&gt;%
+  rename(HRLH = Q140) %&gt;%
+  rename(HRHH = Q141)</code></pre>
+<p>Next i want to remove variables I don’t need for my analysis. That
+includes everything except for the sociaty ratings (“LFLH” and so on)
+and the political ideology measures</p>
+<pre class="r"><code>ideal_society_simplified &lt;- ideal_society_clean %&gt;%
+  select(LFLH,
+         LFHH,
+         HFLH,
+         HFHH,
+         LRLH,
+         LRHH,
+         HRLH,
+         HRHH,
+         Q2,
+         Q26,
+         Q27,
+         Q28,
+         poli_ori)</code></pre>
+<p>Now that it is just the simplified data, i want to zscore the
+political orientation measures.</p>
+<pre class="r"><code>ideal_society_simplified$Q2 &lt;- as.numeric(ideal_society_simplified$Q2)
+ideal_society_simplified$Q26 &lt;- as.numeric(ideal_society_simplified$Q26)
+ideal_society_simplified$Q27 &lt;- as.numeric(ideal_society_simplified$Q27)
+ideal_society_simplified$Q28 &lt;- as.numeric(ideal_society_simplified$Q28)
+
+ideal_society_simplified &lt;- ideal_society_simplified %&gt;%
+  mutate(z_pol_ori = scale(Q2)) %&gt;%
+  mutate(z_pol_part_pref = scale(Q26)) %&gt;%
+  mutate(z_econ_descr = scale(Q27)) %&gt;%
+  mutate(z_soc_iss = scale(Q28))</code></pre>
+<pre class="r"><code>ideal_society_simplified &lt;- ideal_society_simplified %&gt;%  
+  mutate(avrg_pol_score = rowMeans(select(ideal_society_simplified, z_pol_ori, z_pol_part_pref, z_econ_descr, z_soc_iss), na.rm = TRUE))</code></pre>
+<pre class="r"><code>ideal_society_avrgpoli &lt;- ideal_society_simplified %&gt;%
+  select(LFLH,
+         LFHH,
+         HFLH,
+         HFHH,
+         LRLH,
+         LRHH,
+         HRLH,
+         HRHH,
+         avrg_pol_score)</code></pre>
+<p>Now to go from wide to long</p>
 
 
 

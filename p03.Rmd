@@ -70,4 +70,49 @@ ideal_society_simplified <- ideal_society_clean %>%
          poli_ori)
 ```
 
-Now that it is just the simmplified data, i want to zscore the political oreintation measures.
+Now that it is just the simplified data, i want to zscore the political orientation measures.
+
+```{r zscore_polori}
+
+ideal_society_simplified$Q2 <- as.numeric(ideal_society_simplified$Q2)
+ideal_society_simplified$Q26 <- as.numeric(ideal_society_simplified$Q26)
+ideal_society_simplified$Q27 <- as.numeric(ideal_society_simplified$Q27)
+ideal_society_simplified$Q28 <- as.numeric(ideal_society_simplified$Q28)
+
+ideal_society_simplified <- ideal_society_simplified %>%
+  mutate(z_pol_ori = scale(Q2)) %>%
+  mutate(z_pol_part_pref = scale(Q26)) %>%
+  mutate(z_econ_descr = scale(Q27)) %>%
+  mutate(z_soc_iss = scale(Q28))
+  
+```
+
+```{r aveargepoliori}
+ideal_society_simplified <- ideal_society_simplified %>%  
+  mutate(avrg_pol_score = rowMeans(select(ideal_society_simplified, z_pol_ori, z_pol_part_pref, z_econ_descr, z_soc_iss), na.rm = TRUE))
+
+
+```
+
+```{r newdataset}
+
+ideal_society_avrgpoli <- ideal_society_simplified %>%
+  select(LFLH,
+         LFHH,
+         HFLH,
+         HFHH,
+         LRLH,
+         LRHH,
+         HRLH,
+         HRHH,
+         avrg_pol_score)
+
+```
+
+Now to go from wide to long
+
+```{r pain}
+
+
+
+```
