@@ -112,6 +112,41 @@ ideal_society_avrgpoli <- ideal_society_simplified %>%
 Now to go from wide to long
 
 ```{r pain}
+ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
+mutate(Subject = row_number())
+
+```
+
+```{r }
+long_ideal_society <- ideal_society_avrgpoli %>%
+ pivot_longer(
+    cols = c(LFLH, LFHH, HFLH, HFHH, LRLH, LRHH, HRLH, HRHH),
+    names_to = "Rating_Type",
+    values_to = "Society_Rating"
+  ) %>%
+  mutate(
+    Family_Values = ifelse(str_detect(Rating_Type, "LF"), 0, 
+                           ifelse(str_detect(Rating_Type, "HF"), 1, NA)),
+    Religion = ifelse(str_detect(Rating_Type, "LR"), 0, 
+                      ifelse(str_detect(Rating_Type, "HR"), 1, NA)),
+    Happiness = ifelse(str_detect(Rating_Type, "LH"), 0, 
+                       ifelse(str_detect(Rating_Type, "HH"), 1, NA))
+  ) %>%
+  select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score)
+
+```
+
+```{r regression}
+
+# Run the regression model with both two-way and three-way interactions
+family_model <- lm(Society_Rating ~ avrg_pol_score * Happiness * Family_Values, data = long_ideal_society %>%
+              filter(!is.na(Family_Values)))
+  
+
+
+summary(family_model)
+
+
 
 
 
