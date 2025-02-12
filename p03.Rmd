@@ -9,6 +9,8 @@ The goal of this project is to run a regression analysis on pilot data i collect
 library(tidyverse) 
 library(tidyr)
 library(dplyr)
+library(lme4)
+library(MuMIn)
 
 ```
 
@@ -138,16 +140,23 @@ long_ideal_society <- ideal_society_avrgpoli %>%
 
 ```{r regression}
 
-# Run the regression model with both two-way and three-way interactions
-family_model <- lm(Society_Rating ~ avrg_pol_score * Happiness * Family_Values, data = long_ideal_society %>%
-              filter(!is.na(Family_Values)))
-  
 
 
-summary(family_model)
+long_ideal_society$Society_Rating <- as.numeric(long_ideal_society$Society_Rating)
 
 
 
+family_mixedmodel <- lmer(Society_Rating ~ avrg_pol_score * Happiness * Family_Values + 
+                          (1 | Subject), 
+                          data = long_ideal_society %>% filter(!is.na(Family_Values)))
+                            
 
+summary(family_mixedmodel)
+
+```
+
+```{r rsqaured}
+
+r.squaredGLMM(family_mixedmodel)
 
 ```
