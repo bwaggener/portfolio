@@ -296,31 +296,38 @@ $(document).ready(function () {
 
 
 <blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
+<p>The purpose of this is to replicate the data cleaning in SPSS that I
+do to get this data ready for analysis. The goal will be to (1) get the
+datafile, (2) remove the survey responses not collected through
+Prolific, and (3) look for and remove any outliers or other responses we
+want to exclude from analysis.</p>
 </blockquote>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)</code></pre>
+<p>This is the datafile that I downloaded from Qualtrics.</p>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)</code></pre>
-<p>Changing the format of the StartDate variable to POSIX because
-apparently I need to.</p>
+<p>I want to filter out responses based on the StartDate variable
+because any responses entered before Jan 28 2025 were test runs of the
+suvey and shouuld not be included in the analysis.</p>
+<p>Apparently I need to changethe format of the StartDate variable to
+POSIX.</p>
 <pre class="r"><code>ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%Y-%m-%d %H:%M:%S&quot;, tz=&quot;UTC&quot;)</code></pre>
-<p>Filtering out responses that were not collected through
-Prolific.These were tests of the survey that qualtrics includes in the
+<p>Here I am filtering out responses that were not collected through
+Prolific.These were tests of the survey that Qualtrics includes in the
 final data export.</p>
 <pre class="r"><code>ideal_society_real_data &lt;- ideal_society %&gt;%
   filter(as.Date(StartDate)==&quot;2025-01-28&quot;) %&gt;%
   filter(Progress != 14)</code></pre>
-<p>Removing one response from the data because their free response was
-not thoughtful enough. They just wrote “5” for our question asking what
-they would like to see happen in washington. Not cool.</p>
+<p>I also removed one response that was incomplete, this is the score of
+“14” under the Progress variable.</p>
+<p>Below I removed one response from the data because their free
+response was not thoughtful enough. They just wrote “5” for our question
+asking what they would like to see happen in Washington. We still paid
+them but want to remove them from analysis.</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_real_data %&gt;%
   filter(Q127 != 5)</code></pre>
 <p>Here’s a plot showing a distribution of participants survey response
-durations. Practicing visualizing data!</p>
+duration. Practicing visualizing data!</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   mutate(Duration..in.seconds. = as.numeric(Duration..in.seconds.))
 
@@ -328,13 +335,7 @@ ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
   geom_histogram(binwidth = 25, fill = &quot;blue&quot;, color = &quot;black&quot;) +
   labs(title = &quot;Distribution of Duration&quot;, x = &quot;Duration (in seconds)&quot;, y = &quot;Frequency&quot;) +
   theme_minimal()</code></pre>
-<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" /></p>
-<pre class="r"><code>ggplot(ideal_society_clean, aes(x = &quot;&quot;, y = Duration..in.seconds.)) +
-  geom_violin(fill = &quot;blue&quot;, color = &quot;black&quot;) +
-  geom_boxplot(width = 0.2, color = &quot;black&quot;, outlier.shape = 4)+
-  labs(title = &quot;Distribution of Duration&quot;, x = &quot;&quot;, y = &quot;Duration (in seconds)&quot;) +
-  theme_minimal()</code></pre>
-<p><img src="p01_files/figure-html/violinplot-1.png" width="672" />
+<p><img src="p01_files/figure-html/plot_duration-1.png" width="672" />
 Checking for any outliers. According to Prolific, we don’t have to pay
 anyone who is three SD below the mean.</p>
 <pre class="r"><code>z_score_duration &lt;- scale(ideal_society_clean$Duration..in.seconds.)
@@ -343,7 +344,7 @@ ideal_society_clean$outlier &lt;- abs(z_score_duration) &gt; 3</code></pre>
 survey and while there were three participants where their duration was
 farther than 3 standard deviations from the mean, they were all greater
 than the mean and we are more concerned with people speeding through the
-suvey than taking a longer time.</p>
+survey than taking a longer time.</p>
 <p>This cleaned dataset is ready to be used in my analysis!!
 WHOOOOO!</p>
 
