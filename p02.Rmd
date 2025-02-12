@@ -66,4 +66,47 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
+```{r means_se}
+
+ideal_society_clean$LTLH <- as.numeric(as.character(ideal_society_clean$LTLH))
+ideal_society_clean$LTHH <- as.numeric(as.character(ideal_society_clean$LTHH))
+
+
+means_and_se <-ideal_society_clean %>%
+  group_by(poli_ori) %>%
+  summarize(
+    LTLH_mean = mean(LTLH),
+    LTHH_mean = mean(LTHH),
+    LTLH_se = sd(LTLH) / sqrt(n()),
+    LTHH_se = sd(LTHH) / sqrt(n())
+  )
+
+```
+
+```{r plotting}
+
+
+```
+
+
+``{r widetolong}
+# Reshape the data
+long_data <- means_and_se %>%
+  pivot_longer(cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se), 
+               names_to = c("variable", "stat"), 
+               names_pattern = "(.*)_(.*)", 
+               values_to = "value")
+
+```
+
+``{r plotting}
+ggplot(long_data %>% filter(stat == "mean"), aes(x = variable, y = value, color = poli_ori, group = poli_ori)) +
+  geom_point(size = 3) +
+  geom_line() +
+  labs(y = "Mean Score", x = "Variables") +
+  theme_minimal() +
+  scale_x_discrete(labels = c("LTLH", "LTHH"))  # Custom labels for x-axis
+
+
+
 ```

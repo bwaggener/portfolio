@@ -327,7 +327,31 @@ ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(LRHH = Q139) %&gt;%
   rename(HRLH = Q140) %&gt;%
   rename(HRHH = Q141)</code></pre>
-<p>```</p>
+<pre class="r"><code>ideal_society_clean$LTLH &lt;- as.numeric(as.character(ideal_society_clean$LTLH))
+ideal_society_clean$LTHH &lt;- as.numeric(as.character(ideal_society_clean$LTHH))
+
+
+means_and_se &lt;-ideal_society_clean %&gt;%
+  group_by(poli_ori) %&gt;%
+  summarize(
+    LTLH_mean = mean(LTLH),
+    LTHH_mean = mean(LTHH),
+    LTLH_se = sd(LTLH) / sqrt(n()),
+    LTHH_se = sd(LTHH) / sqrt(n())
+  )</code></pre>
+<pre class="r"><code># Reshape the data
+long_data &lt;- means_and_se %&gt;%
+  pivot_longer(cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se), 
+               names_to = c(&quot;variable&quot;, &quot;stat&quot;), 
+               names_pattern = &quot;(.*)_(.*)&quot;, 
+               values_to = &quot;value&quot;)</code></pre>
+<pre class="r"><code>ggplot(long_data %&gt;% filter(stat == &quot;mean&quot;), aes(x = variable, y = value, color = poli_ori, group = poli_ori)) +
+  geom_point(size = 3) +
+  geom_line() +
+  labs(y = &quot;Mean Score&quot;, x = &quot;Variables&quot;) +
+  theme_minimal() +
+  scale_x_discrete(labels = c(&quot;LTLH&quot;, &quot;LTHH&quot;))  # Custom labels for x-axis</code></pre>
+<p><img src="p02_files/figure-html/plotting-1.png" width="672" /></p>
 
 
 
