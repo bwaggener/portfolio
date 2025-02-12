@@ -2,7 +2,7 @@
 title: "Portfolio 3"
 ---
 
-The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. I think i will break this up into several portfolios eventually but i need this all here for now.
+The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. I think i may break this up into several portfolios eventually but i need this all here for now.
 
 
 ```{r load-packages, message=FALSE}
