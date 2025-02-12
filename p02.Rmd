@@ -1,7 +1,7 @@
 ---
 title: "Portfolio 2"
 ---
-The goal of this is to take my cleaned data and make graphs based on the means and se of the data. I want to make two graphs for this.
+The goal of this is to take my cleaned data and make 1 graph based on the means and se of the data. 
 
 
 ```{r load-packages, message=FALSE}
