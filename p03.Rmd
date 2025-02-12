@@ -52,7 +52,7 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
-Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures
+Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures. I am taking out the immigration societies to simplify it further.
 
 
 ```{r removingvariables}
@@ -89,6 +89,8 @@ ideal_society_simplified <- ideal_society_simplified %>%
   
 ```
 
+Here i am making a new variable that is an average of the z scored political orientation variables. The goal of this is to use it as a predictor in the regression.
+
 ```{r aveargepoliori}
 ideal_society_simplified <- ideal_society_simplified %>%  
   mutate(avrg_pol_score = rowMeans(select(ideal_society_simplified, z_pol_ori, z_pol_part_pref, z_econ_descr, z_soc_iss), na.rm = TRUE))
@@ -118,6 +120,8 @@ ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
 mutate(Subject = row_number())
 
 ```
+
+Here i transformed the data from wide to long and recoded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional- (HF) are coded as 1. 
 
 ```{r }
 long_ideal_society <- ideal_society_avrgpoli %>%
@@ -158,5 +162,18 @@ summary(family_mixedmodel)
 ```{r rsqaured}
 
 r.squaredGLMM(family_mixedmodel)
+
+```
+
+
+```{r religionmodel}
+
+
+religion_mixedmodel <- lmer(Society_Rating ~ avrg_pol_score * Happiness * Religion + 
+                          (1 | Subject), 
+                          data = long_ideal_society %>% filter(!is.na(Religion)))
+                            
+
+summary(religion_mixedmodel)
 
 ```
