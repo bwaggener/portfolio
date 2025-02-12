@@ -94,9 +94,41 @@ long_means_and_se <- means_and_se %>%
     values_to = "variable_value"
   )
 
+long_means_and_se$Society_Type <- factor(long_means_and_se$Society_Type, levels = c("LTLH", "LTHH"))
+
+```
+
+```{r longtowide}
+long_means_and_se <- long_means_and_se %>%
+  pivot_wider(
+    names_from = "Stat",
+    values_from = "variable_value"
+  )
 ```
 
 
 
+
+
+```{r scatterplot}
+ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
+  geom_point(position = position_dodge(width = 0.0), size = 3) +
+  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), size = 1)+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                width = 0.2, 
+                position = position_dodge(width = 0.0)) +
+ scale_color_manual(values = c("Conservative" = "red", "Liberal" = "blue")) +
+   scale_y_continuous(
+    limits = c(1, 11),  # Set the y-axis range from 1 to 11
+    breaks = seq(1, 11, by = 1)  # Set ticks every 1 unit from 1 to 11
+  ) + 
+  
+  labs(
+    title = "Nontraditional Family Values",
+    x = "Low to High Happiness",
+    y = "Ideal Society Ratings",
+    color = "Political Orientation"
+  ) +
+  theme_minimal()
 
 ```
