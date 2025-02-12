@@ -119,8 +119,8 @@ ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
                 position = position_dodge(width = 0.0)) +
  scale_color_manual(values = c("Conservative" = "red", "Liberal" = "blue")) +
    scale_y_continuous(
-    limits = c(1, 11),  # Set the y-axis range from 1 to 11
-    breaks = seq(1, 11, by = 1)  # Set ticks every 1 unit from 1 to 11
+    limits = c(1, 11), 
+    breaks = seq(1, 11, by = 1)  
   ) + 
   
   labs(
