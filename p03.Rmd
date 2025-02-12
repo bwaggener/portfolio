@@ -2,4 +2,72 @@
 title: "Portfolio 3"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. I think i will break this up into several portfolios eventually but i need this all here for now.
+
+
+```{r load-packages, message=FALSE}
+library(tidyverse) 
+library(tidyr)
+library(dplyr)
+
+```
+
+```{r cleaneddata}
+
+ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
+
+ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+
+ideal_society_real_data <- ideal_society %>%
+  filter(as.Date(StartDate)=="2025-01-28") %>%
+  filter(Progress != 14)
+
+ideal_society_clean <- ideal_society_real_data %>%
+  filter(Q127 != 5)
+
+politicalorientation_data <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv")
+
+ideal_society_clean <- ideal_society_clean %>%
+  left_join(politicalorientation_data, by = "PROLIFIC_PID")
+  
+ideal_society_clean <- ideal_society_clean %>%
+  rename (poli_ori = PROLIFIC_Political.spectrum..us.)
+
+ideal_society_clean <- ideal_society_clean %>%
+  rename(LILH = Q7) %>%
+  rename(LIHH = Q4) %>%
+  rename(HILH = Q6) %>%
+  rename(HIHH = Q5) %>%
+  rename(LFLH = Q8) %>%
+  rename(LFHH = Q124) %>%
+  rename(HFLH = Q125) %>%
+  rename(HFHH = Q126) %>%
+  rename(LRLH = Q137) %>%
+  rename(LRHH = Q139) %>%
+  rename(HRLH = Q140) %>%
+  rename(HRHH = Q141)
+
+```
+
+Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures
+
+
+```{r removingvariables}
+ideal_society_simplified <- ideal_society_clean %>%
+  select(LFLH,
+         LFHH,
+         HFLH,
+         HFHH,
+         LRLH,
+         LRHH,
+         HRLH,
+         HRHH,
+         Q2,
+         Q26,
+         Q27,
+         Q28,
+         poli_ori)
+```
+
+Now that it is just the simmplified data, i want to zscore the political oreintation measures.
