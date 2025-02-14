@@ -2,4 +2,26 @@
 title: "Portfolio 4"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+```{r load-packages, message=FALSE}
+library(tidyverse) 
+library(tidyr)
+library(dplyr)
+library(lme4)
+library(MuMIn)
+library(lmerTest)
+```
+
+
+
+```{r getdata}
+ideal_society_2024 <- read_csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\Research\\IdealSocietyData\\Spring2024IdealSociety_Clean.csv")
+```
+
+```{r dataclean}
+ideal_society_clean_2024 <- ideal_society_2024[-c(1, 2), ]
+
+ideal_society_clean_2024$StartDate <- as.POSIXct(ideal_society_clean_2024$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
+
+
+
+```
