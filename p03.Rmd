@@ -2,8 +2,7 @@
 title: "Portfolio 3"
 ---
 
-The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. I think i may break this up into several portfolios eventually but i need this all here for now.
-
+The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. 
 
 ```{r load-packages, message=FALSE}
 library(tidyverse) 
@@ -14,6 +13,8 @@ library(MuMIn)
 library(lmerTest)
 
 ```
+
+Same process i did from portfolio 1 and 2.
 
 ```{r cleaneddata}
 
@@ -53,7 +54,7 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
-Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures. I am taking out the immigration societies to simplify it further.
+Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures. I am taking out the immigration societies to simplify it further (we decided to not analyzing those societies).
 
 
 ```{r removingvariables}
@@ -73,7 +74,7 @@ ideal_society_simplified <- ideal_society_clean %>%
          poli_ori)
 ```
 
-Now that it is just the simplified data, i want to zscore the political orientation measures.
+Now that it is just the simplified data, i want to zscore the political orientation measures. I am doing this to later average them and create a composite political orientation score. I need to z_score them because they are on different scales.
 
 ```{r zscore_polori}
 
@@ -140,13 +141,13 @@ long_ideal_society <- ideal_society_avrgpoli %>%
     Religion = ifelse(str_detect(Rating_Type, "LR"), 0, 
                       ifelse(str_detect(Rating_Type, "HR"), 1, NA)),
     Happiness = ifelse(str_detect(Rating_Type, "LH"), 0, 
-                       ifelse(str_detect(Rating_Type, "HH"), 1, NA))
-  ) %>%
+                       ifelse(str_detect(Rating_Type, "HH"), 1, NA))) %>%
   select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score)
 
 ```
 
 
+Here I am running a regression analysis on the data. I am predicting the society ratings based on the political orientation measure, happiness, and family values. I am also including a random effect for subject to account for systematic differences between subjects.
 
 ```{r regression}
 
@@ -164,13 +165,7 @@ family_mixedmodel <- lmer(Society_Rating ~ avrg_pol_score * Happiness * Family_V
 summary(family_mixedmodel)
 
 ```
-
-```{r rsqaured}
-
-r.squaredGLMM(family_mixedmodel)
-
-```
-
+Here I am doing the same thing with the religion variable.
 
 ```{r religionmodel}
 
