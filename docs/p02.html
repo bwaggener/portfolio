@@ -295,8 +295,8 @@ $(document).ready(function () {
 </div>
 
 
-<p>The goal of this is to take my cleaned data and make graphs based on
-the means and se of the data. I want to make two graphs for this.</p>
+<p>The goal of this is to take my cleaned data and make 1 graph based on
+the means and se of the data.</p>
 <pre class="r"><code>library(tidyverse) 
 library(tidyr)
 library(ggplot2)</code></pre>
@@ -310,13 +310,17 @@ ideal_society$StartDate &lt;- as.POSIXct(ideal_society$StartDate, format=&quot;%
 
 ideal_society_clean &lt;- ideal_society_real_data %&gt;%
   filter(Q127 != 5)</code></pre>
-<p>Now I need to add political orientation data</p>
+<p>Now I need to add political orientation data. This comes from
+Prolific and is a self reported measure of political orientation
+(“conservative” or “liberal”).</p>
 <pre class="r"><code>politicalorientation_data &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv&quot;)
 
 ideal_society_clean &lt;- ideal_society_clean %&gt;%
   left_join(politicalorientation_data, by = &quot;PROLIFIC_PID&quot;)</code></pre>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename (poli_ori = PROLIFIC_Political.spectrum..us.)</code></pre>
+<p>Here I am renaming the variable names to make them easier to work
+with.</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(LILH = Q7) %&gt;%
   rename(LIHH = Q4) %&gt;%
@@ -330,6 +334,7 @@ ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(LRHH = Q139) %&gt;%
   rename(HRLH = Q140) %&gt;%
   rename(HRHH = Q141)</code></pre>
+<p>Here I am calculating means and se for the society data.</p>
 <pre class="r"><code>ideal_society_clean$LTLH &lt;- as.numeric(as.character(ideal_society_clean$LTLH))
 ideal_society_clean$LTHH &lt;- as.numeric(as.character(ideal_society_clean$LTHH))
 
@@ -342,13 +347,55 @@ means_and_se &lt;-ideal_society_clean %&gt;%
     LTLH_se = sd(LTLH) / sqrt(n()),
     LTHH_se = sd(LTHH) / sqrt(n())
   )</code></pre>
+<p>Here I am converting the dataset from wide to long. I am making new
+rows for means and se for each society type</p>
 <pre class="r"><code>long_means_and_se &lt;- means_and_se %&gt;%
   pivot_longer(
     cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se),
     names_to = c(&quot;Society_Type&quot;, &quot;Stat&quot;),
     names_pattern = &quot;(LTLH|LTHH)_(mean|se)&quot;,
     values_to = &quot;variable_value&quot;
+  )
+
+long_means_and_se$Society_Type &lt;- factor(long_means_and_se$Society_Type, levels = c(&quot;LTLH&quot;, &quot;LTHH&quot;))</code></pre>
+<p>Here I am making the dataset wide again so I can make a scatterplot
+using the means and se data that are now in different columns whereas
+earlier they were in the same column (“stat”).</p>
+<pre class="r"><code>long_means_and_se &lt;- long_means_and_se %&gt;%
+  pivot_wider(
+    names_from = &quot;Stat&quot;,
+    values_from = &quot;variable_value&quot;
   )</code></pre>
+<p>Here is my scatter plot. I am plotting the data from the
+long_means_and_se dataset. This is plotting the means and se for one
+society type (nontraditional family values) at both levels of happiness
+(low and high). I am also coloring the points based on political
+orientation.</p>
+<pre class="r"><code>ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
+  geom_point(position = position_dodge(width = 0.0), size = 3) +
+  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), size = 1)+
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                width = 0.2, 
+                position = position_dodge(width = 0.0)) +
+ scale_color_manual(values = c(&quot;Conservative&quot; = &quot;red&quot;, &quot;Liberal&quot; = &quot;blue&quot;)) +
+   scale_y_continuous(
+    limits = c(1, 11), 
+    breaks = seq(1, 11, by = 1)  
+  ) + 
+  
+  labs(
+    title = &quot;Nontraditional Family Values&quot;,
+    x = &quot;Low to High Happiness&quot;,
+    y = &quot;Ideal Society Ratings&quot;,
+    color = &quot;Political Orientation&quot;
+  ) +
+  theme_minimal()</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<p><img src="p02_files/figure-html/scatterplot-1.png" width="672" /></p>
 
 
 

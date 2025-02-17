@@ -30,9 +30,9 @@ ideal_society_clean <- ideal_society_real_data %>%
 
 ```
 
-Now I need to add political orientation data
+Now I need to add political orientation data. This comes from Prolific and is a self reported measure of political orientation ("conservative" or "liberal").
 
-```{r screams}
+```{r politicalorientationdata}
 politicalorientation_data <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv")
 
 ideal_society_clean <- ideal_society_clean %>%
@@ -48,6 +48,8 @@ ideal_society_clean <- ideal_society_clean %>%
   rename (poli_ori = PROLIFIC_Political.spectrum..us.)
 
 ```
+
+Here I am renaming the variable names to make them easier to work with.
 
 ```{r renamingsocieties}
 
@@ -67,6 +69,8 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
+Here I am calculating means and se for the society data.
+
 ```{r means_se}
 
 ideal_society_clean$LTLH <- as.numeric(as.character(ideal_society_clean$LTLH))
@@ -84,6 +88,8 @@ means_and_se <-ideal_society_clean %>%
 
 ```
 
+Here I am converting the dataset from wide to long. I am making new rows for means and se for each society type
+
 ```{r widetolong}
 
 long_means_and_se <- means_and_se %>%
@@ -98,6 +104,8 @@ long_means_and_se$Society_Type <- factor(long_means_and_se$Society_Type, levels 
 
 ```
 
+Here I am making the dataset wide again so I can make a scatterplot using the means and se data that are now in different columns whereas earlier they were in the same column ("stat").
+
 ```{r longtowide}
 long_means_and_se <- long_means_and_se %>%
   pivot_wider(
@@ -108,7 +116,7 @@ long_means_and_se <- long_means_and_se %>%
 
 
 
-
+Here is my scatter plot. I am plotting the data from the long_means_and_se dataset. This is plotting the means and se for one society type (nontraditional family values) at both levels of happiness (low and high). I am also coloring the points based on political orientation.
 
 ```{r scatterplot}
 ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
