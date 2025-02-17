@@ -118,25 +118,23 @@ long_means_and_se <- long_means_and_se %>%
 
 Here is my scatter plot. I am plotting the data from the long_means_and_se dataset. This is plotting the means and se for one society type (nontraditional family values) at both levels of happiness (low and high). I am also coloring the points based on political orientation.
 
+The title reflects the information that I am trying to convey based on the data. 
+This plot shows how conservatives and liberals rate a society with nontraditional family values at low and high happiness levels. The lines are added to emphasize the different effect of happiness on conservatives and liberals (the primary focus of my project). This is shown through the slope of the line as increasing the society's happiness levels has a stronger effect on liberals compared to conservatives (slope is larger for liberals comapred to conservatives).
+
 ```{r scatterplot}
 ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
   geom_point(position = position_dodge(width = 0.0), size = 3) +
-  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), size = 1)+
+  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), linewidth = 1)+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
-                width = 0.2, 
-                position = position_dodge(width = 0.0)) +
- scale_color_manual(values = c("Conservative" = "red", "Liberal" = "blue")) +
-   scale_y_continuous(
-    limits = c(1, 11), 
-    breaks = seq(1, 11, by = 1)  
-  ) + 
+                width = 0.2, position = position_dodge(width = 0.0)) +
+  scale_color_manual(values = c("Conservative" = "red", "Liberal" = "blue")) +
+   scale_y_continuous(limits = c(1, 11), breaks = seq(1, 11, by = 1)) + 
   
-  labs(
-    title = "Nontraditional Family Values",
+  labs(title = "Nontraditional Family Values",
     x = "Low to High Happiness",
     y = "Ideal Society Ratings",
-    color = "Political Orientation"
-  ) +
+    color = "Political Orientation") +
   theme_minimal()
 
 ```
+
