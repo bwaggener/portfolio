@@ -97,7 +97,6 @@ Here i am making a new variable that is an average of the z scored political ori
 ideal_society_simplified <- ideal_society_simplified %>%  
   mutate(avrg_pol_score = rowMeans(select(ideal_society_simplified, z_pol_ori, z_pol_part_pref, z_econ_descr, z_soc_iss), na.rm = TRUE))
 
-
 ```
 
 This averages the political orientation data and makes a new dataset.
@@ -114,7 +113,6 @@ ideal_society_avrgpoli <- ideal_society_simplified %>%
          HRLH,
          HRHH,
          avrg_pol_score)
-
 ```
 
 
@@ -123,7 +121,6 @@ Here I am making a new variable that is the subject number. This is important fo
 ```{r newvariable_subject}
 ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
 mutate(Subject = row_number())
-
 ```
 
 Here i transformed the data from wide to long and re-coded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the one that might violate conservative values.Also conservatives are larger scores on the political orientation measure (i.e. 1 would be more conservative than -.4 which would be more liberal).
