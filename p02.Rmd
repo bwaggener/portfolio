@@ -32,14 +32,14 @@ ideal_society_clean <- ideal_society_real_data %>%
 
 Now I need to add political orientation data. This comes from Prolific and is a self reported measure of political orientation ("conservative" or "liberal").
 
+"left_join" merges two df based on a key column. In this case the key column is the Prolific IDs. This works by merging the df1 (ideal_society_clean) and df2 (politicalorientation_data) such that the rows line up based on the key column. Also if any of the rows in df2 are not present in df1, they are not included in the merge. All of the rows in df1 are retained. This is especially important if I have already removed outliers from df1 but not df2.
+
 ```{r politicalorientationdata}
 politicalorientation_data <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv")
 
 ideal_society_clean <- ideal_society_clean %>%
   left_join(politicalorientation_data, by = "PROLIFIC_PID")
   
-
-
 ```
   
  
@@ -49,7 +49,7 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
-Here I am renaming the variable names to make them easier to work with.
+Here I renamed the variable names to make them easier to work with.
 
 ```{r renamingsocieties}
 
@@ -71,6 +71,8 @@ ideal_society_clean <- ideal_society_clean %>%
 
 Here I am calculating means and se for the society data.
 
+First they needed to be converted to numeric.
+
 ```{r means_se}
 
 ideal_society_clean$LTLH <- as.numeric(as.character(ideal_society_clean$LTLH))
@@ -89,6 +91,10 @@ means_and_se <-ideal_society_clean %>%
 ```
 
 Here I am converting the dataset from wide to long. I am making new rows for means and se for each society type
+
+This makes it easier for ggplot to read the data for data visualization.
+
+I went down from 5 columns to 4. This splits the variable names from the means_and_se dataset (i.e. LTLH_mean, LTLH_se, ...) into one column with the society type (LTLH) and two others with either the means or the se. Also there is a column wiht the name of the stat.
 
 ```{r widetolong}
 
@@ -119,6 +125,8 @@ long_means_and_se <- long_means_and_se %>%
 Here is my scatter plot. I am plotting the data from the long_means_and_se dataset. This is plotting the means and se for one society type (nontraditional family values) at both levels of happiness (low and high). I am also coloring the points based on political orientation.
 
 The title reflects the information that I am trying to convey based on the data. 
+This plots the means of the society type and uses different colors to show the means of conservatives and liberals separately.
+
 This plot shows how conservatives and liberals rate a society with nontraditional family values at low and high happiness levels. The lines are added to emphasize the different effect of happiness on conservatives and liberals (the primary focus of my project). This is shown through the slope of the line as increasing the society's happiness levels has a stronger effect on liberals compared to conservatives (slope is larger for liberals comapred to conservatives).
 
 ```{r scatterplot}
@@ -138,3 +146,4 @@ ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
 
 ```
 
+Eventually, I will be making two graphs for each society type for my thesis project. One graph will be the society that violates conservative values (nontraditional family values) at two levels of happiness. The other will not violate conservative values (traditional family values) at two levels fo happiness. 

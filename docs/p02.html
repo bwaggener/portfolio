@@ -313,13 +313,20 @@ ideal_society_clean &lt;- ideal_society_real_data %&gt;%
 <p>Now I need to add political orientation data. This comes from
 Prolific and is a self reported measure of political orientation
 (“conservative” or “liberal”).</p>
+<p>“left_join” merges two df based on a key column. In this case the key
+column is the Prolific IDs. This works by merging the df1
+(ideal_society_clean) and df2 (politicalorientation_data) such that the
+rows line up based on the key column. Also if any of the rows in df2 are
+not present in df1, they are not included in the merge. All of the rows
+in df1 are retained. This is especially important if I have already
+removed outliers from df1 but not df2.</p>
 <pre class="r"><code>politicalorientation_data &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\CopyMergefile.csv&quot;)
 
 ideal_society_clean &lt;- ideal_society_clean %&gt;%
   left_join(politicalorientation_data, by = &quot;PROLIFIC_PID&quot;)</code></pre>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename (poli_ori = PROLIFIC_Political.spectrum..us.)</code></pre>
-<p>Here I am renaming the variable names to make them easier to work
+<p>Here I renamed the variable names to make them easier to work
 with.</p>
 <pre class="r"><code>ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(LILH = Q7) %&gt;%
@@ -335,6 +342,7 @@ with.</p>
   rename(HRLH = Q140) %&gt;%
   rename(HRHH = Q141)</code></pre>
 <p>Here I am calculating means and se for the society data.</p>
+<p>First they needed to be converted to numeric.</p>
 <pre class="r"><code>ideal_society_clean$LTLH &lt;- as.numeric(as.character(ideal_society_clean$LTLH))
 ideal_society_clean$LTHH &lt;- as.numeric(as.character(ideal_society_clean$LTHH))
 
@@ -349,6 +357,12 @@ means_and_se &lt;-ideal_society_clean %&gt;%
   )</code></pre>
 <p>Here I am converting the dataset from wide to long. I am making new
 rows for means and se for each society type</p>
+<p>This makes it easier for ggplot to read the data for data
+visualization.</p>
+<p>I went down from 5 columns to 4. This splits the variable names from
+the means_and_se dataset (i.e. LTLH_mean, LTLH_se, …) into one column
+with the society type (LTLH) and two others with either the means or the
+se. Also there is a column wiht the name of the stat.</p>
 <pre class="r"><code>long_means_and_se &lt;- means_and_se %&gt;%
   pivot_longer(
     cols = c(LTLH_mean, LTHH_mean, LTLH_se, LTHH_se),
@@ -371,31 +385,36 @@ long_means_and_se dataset. This is plotting the means and se for one
 society type (nontraditional family values) at both levels of happiness
 (low and high). I am also coloring the points based on political
 orientation.</p>
+<p>The title reflects the information that I am trying to convey based
+on the data. This plots the means of the society type and uses different
+colors to show the means of conservatives and liberals separately.</p>
+<p>This plot shows how conservatives and liberals rate a society with
+nontraditional family values at low and high happiness levels. The lines
+are added to emphasize the different effect of happiness on
+conservatives and liberals (the primary focus of my project). This is
+shown through the slope of the line as increasing the society’s
+happiness levels has a stronger effect on liberals compared to
+conservatives (slope is larger for liberals comapred to
+conservatives).</p>
 <pre class="r"><code>ggplot(long_means_and_se, aes(x = Society_Type, y = mean, color = poli_ori)) +
   geom_point(position = position_dodge(width = 0.0), size = 3) +
-  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), size = 1)+
+  geom_line(aes(group = poli_ori), position = position_dodge(width = 0), linewidth = 1)+
   geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
-                width = 0.2, 
-                position = position_dodge(width = 0.0)) +
- scale_color_manual(values = c(&quot;Conservative&quot; = &quot;red&quot;, &quot;Liberal&quot; = &quot;blue&quot;)) +
-   scale_y_continuous(
-    limits = c(1, 11), 
-    breaks = seq(1, 11, by = 1)  
-  ) + 
+                width = 0.2, position = position_dodge(width = 0.0)) +
+  scale_color_manual(values = c(&quot;Conservative&quot; = &quot;red&quot;, &quot;Liberal&quot; = &quot;blue&quot;)) +
+   scale_y_continuous(limits = c(1, 11), breaks = seq(1, 11, by = 1)) + 
   
-  labs(
-    title = &quot;Nontraditional Family Values&quot;,
+  labs(title = &quot;Nontraditional Family Values&quot;,
     x = &quot;Low to High Happiness&quot;,
     y = &quot;Ideal Society Ratings&quot;,
-    color = &quot;Political Orientation&quot;
-  ) +
+    color = &quot;Political Orientation&quot;) +
   theme_minimal()</code></pre>
-<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
-## ℹ Please use `linewidth` instead.
-## This warning is displayed once every 8 hours.
-## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
-## generated.</code></pre>
-<p><img src="p02_files/figure-html/scatterplot-1.png" width="672" /></p>
+<p><img src="p02_files/figure-html/scatterplot-1.png" width="672" />
+Eventually, I will be making two graphs for each society type for my
+thesis project. One graph will be the society that violates conservative
+values (nontraditional family values) at two levels of happiness. The
+other will not violate conservative values (traditional family values)
+at two levels fo happiness.</p>
 
 
 
