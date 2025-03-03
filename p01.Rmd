@@ -22,7 +22,7 @@ ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2
 
 I want to filter out responses based on the StartDate variable because any responses entered before Jan 28 2025 were test runs of the suvey and shouuld not be included in the analysis.
 
-Apparently I need to changethe format of the StartDate variable to POSIX. 
+Apparently I need to change the format of the StartDate variable to POSIX. 
 
 ```{r cleaningdata_1}
 ideal_society$StartDate <- as.POSIXct(ideal_society$StartDate, format="%Y-%m-%d %H:%M:%S", tz="UTC")
@@ -66,7 +66,7 @@ ggplot(ideal_society_clean, aes(x = Duration..in.seconds.)) +
 
 ```
 
-Checking for any outliers. According to Prolific, we don't have to pay anyone who is three SD below the mean.
+Checking for any outliers. Per Prolific's data check standards: we don't have to pay anyone who is three SD below the mean. This
 
 ```{r outliers}
 
@@ -77,4 +77,4 @@ ideal_society_clean$outlier <- abs(z_score_duration) > 3
 
 This checked for outliers based on duration it took to complete the survey and while there were three participants where their duration was farther than 3 standard deviations from the mean, they were all greater than the mean and we are more concerned with people speeding through the survey than taking a longer time. 
 
-This cleaned dataset is ready to be used in my analysis!! WHOOOOO!
+I was able to replicate my data cleaning through SPSS using R.
