@@ -16,7 +16,7 @@ library(lmerTest)
 
 Same process i did from portfolio 1 and 2.
 
-```{r cleaneddata}
+```{r getting-and-cleaning-data}
 
 ideal_society <- read.csv("C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv")
 
@@ -54,7 +54,7 @@ ideal_society_clean <- ideal_society_clean %>%
 
 ```
 
-Next i want to remove variables I don't need for my analysis. That includes everything except for the sociaty ratings ("LFLH" and so on) and the political ideology measures. I am taking out the immigration societies to simplify it further (we decided to not analyzing those societies).
+Next i want to remove variables I don't need for my analysis. That includes everything except for the society ratings ("LFLH" and so on) and the political ideology measures. I am taking out the immigration societies to simplify it further (we decided to not analyzing those societies).
 
 
 ```{r removingvariables}
@@ -112,7 +112,8 @@ ideal_society_avrgpoli <- ideal_society_simplified %>%
          LRHH,
          HRLH,
          HRHH,
-         avrg_pol_score)
+         avrg_pol_score,
+         poli_ori)
 ```
 
 
@@ -139,8 +140,26 @@ long_ideal_society <- ideal_society_avrgpoli %>%
                       ifelse(str_detect(Rating_Type, "HR"), 1, NA)),
     Happiness = ifelse(str_detect(Rating_Type, "LH"), 0, 
                        ifelse(str_detect(Rating_Type, "HH"), 1, NA))) %>%
-  select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score)
+  select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score, poli_ori)
 
+```
+
+I want to see how our collected political orientation data that is continuous compares to the self-reported Prolific data.
+```{r poli_ori-check}
+
+is_analysis <- long_ideal_society %>%
+  mutate(
+   dichotomized_poliori = ifelse(avrg_pol_score <= 0, "Liberal", "Conservative")
+  )
+
+```
+
+Now I want to run code checking if this matches up with the Prolific data.
+```{r poli_ori_comparison}
+
+all(is_analysis$poli_ori == is_analysis$dichotomized_poliori, na.rm = TRUE)
+
+###sum(..., na.rm = TRUE)
 ```
 
 
