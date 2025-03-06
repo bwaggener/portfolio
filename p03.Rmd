@@ -194,3 +194,8 @@ religion_mixedmodel <- lmer(Society_Rating ~ avrg_pol_score * Happiness * Religi
 summary(religion_mixedmodel)
 
 ```
+
+```{r coefficients}
+famval_model_coefs <- coef(summary(family_mixedmodel))
+rel_model_coefs <- coef(summary(religion_mixedmodel))
+```
