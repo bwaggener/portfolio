@@ -2,7 +2,7 @@
 title: "Portfolio 3"
 ---
 
-The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. 
+The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. And make a visualization 
 
 ```{r load-packages, message=FALSE}
 library(tidyverse) 
@@ -11,6 +11,7 @@ library(dplyr)
 library(lme4)
 library(MuMIn)
 library(lmerTest)
+library(ggplot2)
 
 ```
 
@@ -159,11 +160,22 @@ Now I want to run code checking if this matches up with the Prolific data.
 
 all(is_analysis$poli_ori == is_analysis$dichotomized_poliori, na.rm = TRUE)
 
-###sum(..., na.rm = TRUE)
+sum(is_analysis$poli_ori != is_analysis$dichotomized_poliori)
 ```
+This means that 24 of the political orientation measures do not match up with the Prolific data. Quickly scrolling through the data, it seems that the dichotomized measure is more likely to classify someone who is liberal as conservative based on their responses to our political orientation measures. 
+
+
 
 
 Here I am running a regression analysis on the data. I am predicting the society ratings based on the political orientation measure, happiness, and family values. I am also including a random effect for subject to account for systematic differences between subjects.
+
+before i do this i want to convert my variables into the appropriate formats
+```{r regression_prep}
+long_ideal_society$Family_Values <- as.factor(long_ideal_society$Family_Values)
+long_ideal_society$Religion <- as.factor(long_ideal_society$Religion)
+long_ideal_society$Happiness <- as.factor(long_ideal_society$Happiness)
+
+```
 
 ```{r regression}
 
@@ -195,7 +207,44 @@ summary(religion_mixedmodel)
 
 ```
 
-```{r coefficients}
-famval_model_coefs <- coef(summary(family_mixedmodel))
-rel_model_coefs <- coef(summary(religion_mixedmodel))
+Just looking at the family values results, I want to visually represent the regression results.
+
+```{r packages}
+
+library(broom)
+library(dotwhisker)
+library(emmeans)
+```
+
+
+
+
+```{r visualization}
+# Step 1: Run the model, making sure poli_ori is treated as a factor
+family_mixedmodel <- lmer(Society_Rating ~ avrg_pol_score * Happiness * Family_Values + 
+                          (1 | Subject) + factor(poli_ori), 
+                          data = long_ideal_society %>% filter(!is.na(Family_Values)))
+
+# Step 2: Use emmeans with the correct reference for poli_ori
+emm_df <- emmeans(family_mixedmodel, 
+                     ~ Happiness * Family_Values| factor(poli_ori))
+summary(emm_df)
+```
+```{r visualization2}
+emm_df_diff <- emm_df %>%
+  spread(key = Happiness, value = emmean) %>%  # Spread the Happiness levels into separate columns
+  mutate(Diff = `1` - `0`) %>%  # Calculate the difference between Happiness 1 and 0
+  select(Family_Values, poli_ori, Diff, lower.CL, upper.CL)
+
+# Step 2: Plotting the difference
+ggplot(emm_df_diff, aes(x = factor(Family_Values), y = Diff, color = factor(poli_ori))) +
+  geom_point(size = 4, position = position_dodge(width = 0.5)) + 
+  geom_line(aes(group = poli_ori), size = 1, position = position_dodge(width = 0.2)) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = 1, position = position_dodge(width = 0.2)) +
+  labs(title = "Difference in Society Rating (Happiness=1 - Happiness=0) by Society Type and Political Orientation",
+       x = "Society Type (Family Values)",
+       y = "Effect of Happiness on Society Rating",
+       color = "Political Orientation") +
+  scale_color_manual(values = c("blue", "red"), labels = c("Liberal", "Conservative")) +
+  theme_minimal()
 ```
