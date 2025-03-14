@@ -296,12 +296,12 @@ $(document).ready(function () {
 
 
 <p>The goal of this project is to run a regression analysis on pilot
-data i collected for my thesis project.</p>
-<pre class="r"><code>library(tidyverse) 
-library(tidyr)
+data i collected for my thesis project. And make a visualization</p>
+<pre class="r"><code>library(tidyverse) </code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(tidyr)
 library(dplyr)
 library(lme4)
-library(MuMIn)
 library(lmerTest)</code></pre>
 <p>Same process i did from portfolio 1 and 2.</p>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
@@ -338,7 +338,7 @@ ideal_society_clean &lt;- ideal_society_clean %&gt;%
   rename(HRLH = Q140) %&gt;%
   rename(HRHH = Q141)</code></pre>
 <p>Next i want to remove variables I don’t need for my analysis. That
-includes everything except for the sociaty ratings (“LFLH” and so on)
+includes everything except for the society ratings (“LFLH” and so on)
 and the political ideology measures. I am taking out the immigration
 societies to simplify it further (we decided to not analyzing those
 societies).</p>
@@ -386,7 +386,8 @@ dataset.</p>
          LRHH,
          HRLH,
          HRHH,
-         avrg_pol_score)</code></pre>
+         avrg_pol_score,
+         poli_ori)</code></pre>
 <p>Here I am making a new variable that is the subject number. This is
 important for the regression analysis because it allows me to measure
 systematic differences between subjects.</p>
@@ -413,11 +414,33 @@ liberal).</p>
                       ifelse(str_detect(Rating_Type, &quot;HR&quot;), 1, NA)),
     Happiness = ifelse(str_detect(Rating_Type, &quot;LH&quot;), 0, 
                        ifelse(str_detect(Rating_Type, &quot;HH&quot;), 1, NA))) %&gt;%
-  select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score)</code></pre>
+  select(Subject, Society_Rating, Family_Values, Religion, Happiness, avrg_pol_score, poli_ori)</code></pre>
+<p>I want to see how our collected political orientation data that is
+continuous compares to the self-reported Prolific data.</p>
+<pre class="r"><code>is_analysis &lt;- long_ideal_society %&gt;%
+  mutate(
+   dichotomized_poliori = ifelse(avrg_pol_score &lt;= 0, &quot;Liberal&quot;, &quot;Conservative&quot;)
+  )</code></pre>
+<p>Now I want to run code checking if this matches up with the Prolific
+data.</p>
+<pre class="r"><code>all(is_analysis$poli_ori == is_analysis$dichotomized_poliori, na.rm = TRUE)</code></pre>
+<pre><code>## [1] FALSE</code></pre>
+<pre class="r"><code>sum(is_analysis$poli_ori != is_analysis$dichotomized_poliori)</code></pre>
+<pre><code>## [1] 24</code></pre>
+<p>This means that 24 of the political orientation measures do not match
+up with the Prolific data. Quickly scrolling through the data, it seems
+that the dichotomized measure is more likely to classify someone who is
+liberal as conservative based on their responses to our political
+orientation measures.</p>
 <p>Here I am running a regression analysis on the data. I am predicting
 the society ratings based on the political orientation measure,
 happiness, and family values. I am also including a random effect for
 subject to account for systematic differences between subjects.</p>
+<p>before i do this i want to convert my variables into the appropriate
+formats</p>
+<pre class="r"><code>long_ideal_society$Family_Values &lt;- as.factor(long_ideal_society$Family_Values)
+long_ideal_society$Religion &lt;- as.factor(long_ideal_society$Religion)
+long_ideal_society$Happiness &lt;- as.factor(long_ideal_society$Happiness)</code></pre>
 <pre class="r"><code>long_ideal_society$Society_Rating &lt;- as.numeric(long_ideal_society$Society_Rating)
 
 
@@ -446,36 +469,36 @@ family_mixedmodel &lt;- lmer(Society_Rating ~ avrg_pol_score * Happiness * Famil
 ## Number of obs: 396, groups:  Subject, 99
 ## 
 ## Fixed effects:
-##                                        Estimate Std. Error       df t value
-## (Intercept)                              3.2222     0.2062 388.0000  15.623
-## avrg_pol_score                          -0.5205     0.2180 388.0000  -2.387
-## Happiness                                4.9091     0.2917 388.0000  16.831
-## Family_Values                            0.0404     0.2917 388.0000   0.139
-## avrg_pol_score:Happiness                -1.6378     0.3084 388.0000  -5.312
-## avrg_pol_score:Family_Values             1.9190     0.3084 388.0000   6.224
-## Happiness:Family_Values                 -0.2222     0.4125 388.0000  -0.539
-## avrg_pol_score:Happiness:Family_Values   1.4621     0.4361 388.0000   3.353
-##                                        Pr(&gt;|t|)    
-## (Intercept)                             &lt; 2e-16 ***
-## avrg_pol_score                         0.017457 *  
-## Happiness                               &lt; 2e-16 ***
-## Family_Values                          0.889899    
-## avrg_pol_score:Happiness               1.84e-07 ***
-## avrg_pol_score:Family_Values           1.26e-09 ***
-## Happiness:Family_Values                0.590382    
-## avrg_pol_score:Happiness:Family_Values 0.000878 ***
+##                                          Estimate Std. Error       df t value
+## (Intercept)                                3.2222     0.2062 388.0000  15.623
+## avrg_pol_score                            -0.5205     0.2180 388.0000  -2.387
+## Happiness1                                 4.9091     0.2917 388.0000  16.831
+## Family_Values1                             0.0404     0.2917 388.0000   0.139
+## avrg_pol_score:Happiness1                 -1.6378     0.3084 388.0000  -5.312
+## avrg_pol_score:Family_Values1              1.9190     0.3084 388.0000   6.224
+## Happiness1:Family_Values1                 -0.2222     0.4125 388.0000  -0.539
+## avrg_pol_score:Happiness1:Family_Values1   1.4621     0.4361 388.0000   3.353
+##                                          Pr(&gt;|t|)    
+## (Intercept)                               &lt; 2e-16 ***
+## avrg_pol_score                           0.017457 *  
+## Happiness1                                &lt; 2e-16 ***
+## Family_Values1                           0.889899    
+## avrg_pol_score:Happiness1                1.84e-07 ***
+## avrg_pol_score:Family_Values1            1.26e-09 ***
+## Happiness1:Family_Values1                0.590382    
+## avrg_pol_score:Happiness1:Family_Values1 0.000878 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) avrg__ Hppnss Fmly_V av__:H a__:F_ Hp:F_V
-## avrg_pl_scr  0.000                                          
-## Happiness   -0.707  0.000                                   
-## Family_Vals -0.707  0.000  0.500                            
-## avrg_pl_s:H  0.000 -0.707  0.000  0.000                     
-## avrg_p_:F_V  0.000 -0.707  0.000  0.000  0.500              
-## Hppnss:Fm_V  0.500  0.000 -0.707 -0.707  0.000  0.000       
-## avr__:H:F_V  0.000  0.500  0.000  0.000 -0.707 -0.707  0.000
+##             (Intr) avrg__ Hppns1 Fml_V1 av__:H1 a__:F_ H1:F_V
+## avrg_pl_scr  0.000                                           
+## Happiness1  -0.707  0.000                                    
+## Family_Vls1 -0.707  0.000  0.500                             
+## avrg_pl_:H1  0.000 -0.707  0.000  0.000                      
+## avrg__:F_V1  0.000 -0.707  0.000  0.000  0.500               
+## Hppns1:F_V1  0.500  0.000 -0.707 -0.707  0.000   0.000       
+## a__:H1:F_V1  0.000  0.500  0.000  0.000 -0.707  -0.707  0.000
 ## optimizer (nloptwrap) convergence code: 0 (OK)
 ## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
 <p>Here I am doing the same thing with the religion variable.</p>
@@ -504,36 +527,36 @@ summary(religion_mixedmodel)</code></pre>
 ## Number of obs: 396, groups:  Subject, 99
 ## 
 ## Fixed effects:
-##                                    Estimate Std. Error        df t value
-## (Intercept)                         3.16162    0.21897 387.76378  14.439
-## avrg_pol_score                     -0.39798    0.23149 387.76378  -1.719
-## Happiness                           5.22222    0.30746 291.00000  16.985
-## Religion                           -0.09091    0.30746 291.00000  -0.296
-## avrg_pol_score:Happiness           -1.07762    0.32503 291.00000  -3.315
-## avrg_pol_score:Religion             1.74744    0.32503 291.00000   5.376
-## Happiness:Religion                 -0.85859    0.43481 291.00000  -1.975
-## avrg_pol_score:Happiness:Religion   0.97468    0.45966 291.00000   2.120
-##                                   Pr(&gt;|t|)    
-## (Intercept)                        &lt; 2e-16 ***
-## avrg_pol_score                     0.08637 .  
-## Happiness                          &lt; 2e-16 ***
-## Religion                           0.76768    
-## avrg_pol_score:Happiness           0.00103 ** 
-## avrg_pol_score:Religion           1.56e-07 ***
-## Happiness:Religion                 0.04926 *  
-## avrg_pol_score:Happiness:Religion  0.03482 *  
+##                                      Estimate Std. Error        df t value
+## (Intercept)                           3.16162    0.21897 387.76378  14.439
+## avrg_pol_score                       -0.39798    0.23149 387.76378  -1.719
+## Happiness1                            5.22222    0.30746 291.00000  16.985
+## Religion1                            -0.09091    0.30746 291.00000  -0.296
+## avrg_pol_score:Happiness1            -1.07762    0.32503 291.00000  -3.315
+## avrg_pol_score:Religion1              1.74744    0.32503 291.00000   5.376
+## Happiness1:Religion1                 -0.85859    0.43481 291.00000  -1.975
+## avrg_pol_score:Happiness1:Religion1   0.97468    0.45966 291.00000   2.120
+##                                     Pr(&gt;|t|)    
+## (Intercept)                          &lt; 2e-16 ***
+## avrg_pol_score                       0.08637 .  
+## Happiness1                           &lt; 2e-16 ***
+## Religion1                            0.76768    
+## avrg_pol_score:Happiness1            0.00103 ** 
+## avrg_pol_score:Religion1            1.56e-07 ***
+## Happiness1:Religion1                 0.04926 *  
+## avrg_pol_score:Happiness1:Religion1  0.03482 *  
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## Correlation of Fixed Effects:
-##             (Intr) avrg__ Hppnss Relign av__:H av__:R Hppn:R
-## avrg_pl_scr  0.000                                          
-## Happiness   -0.702  0.000                                   
-## Religion    -0.702  0.000  0.500                            
-## avrg_pl_s:H  0.000 -0.702  0.000  0.000                     
-## avrg_pl_s:R  0.000 -0.702  0.000  0.000  0.500              
-## Hppnss:Rlgn  0.496  0.000 -0.707 -0.707  0.000  0.000       
-## avrg_p_:H:R  0.000  0.496  0.000  0.000 -0.707 -0.707  0.000</code></pre>
+##             (Intr) avrg__ Hppns1 Relgn1 av__:H1 a__:R1 Hp1:R1
+## avrg_pl_scr  0.000                                           
+## Happiness1  -0.702  0.000                                    
+## Religion1   -0.702  0.000  0.500                             
+## avrg_pl_:H1  0.000 -0.702  0.000  0.000                      
+## avrg_pl_:R1  0.000 -0.702  0.000  0.000  0.500               
+## Hppnss1:Rl1  0.496  0.000 -0.707 -0.707  0.000   0.000       
+## avr__:H1:R1  0.000  0.496  0.000  0.000 -0.707  -0.707  0.000</code></pre>
 
 
 

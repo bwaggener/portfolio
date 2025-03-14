@@ -2,16 +2,15 @@
 title: "Portfolio 3"
 ---
 
-The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. And make a visualization 
+The goal of this project is to run a regression analysis on pilot data i collected for my thesis project. This is practice for how I will run my full dataset once I collect my responses.
 
 ```{r load-packages, message=FALSE}
 library(tidyverse) 
 library(tidyr)
 library(dplyr)
 library(lme4)
-library(MuMIn)
 library(lmerTest)
-library(ggplot2)
+
 
 ```
 
@@ -77,6 +76,10 @@ ideal_society_simplified <- ideal_society_clean %>%
 
 Now that it is just the simplified data, i want to zscore the political orientation measures. I am doing this to later average them and create a composite political orientation score. I need to z_score them because they are on different scales.
 
+First, I convert the variables to numeric so that I can zscore them.
+
+"Scale" is a function that zscores data. 
+
 ```{r zscore_polori}
 
 ideal_society_simplified$Q2 <- as.numeric(ideal_society_simplified$Q2)
@@ -125,7 +128,7 @@ ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
 mutate(Subject = row_number())
 ```
 
-Here i transformed the data from wide to long and re-coded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the one that might violate conservative values.Also conservatives are larger scores on the political orientation measure (i.e. 1 would be more conservative than -.4 which would be more liberal).
+Here i transformed the data from wide to long and re-coded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the one that might violate conservative values.Also conservatives are larger scores on the political orientation measure (e.g., 1 would be more conservative than -.4 which would be more liberal).
 
 ```{r pivotandrecode}
 long_ideal_society <- ideal_society_avrgpoli %>%
