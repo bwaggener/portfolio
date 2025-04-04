@@ -16,24 +16,38 @@ episode_metrics <- tuesdata$episode_metrics
 ```
 What season has the most questions?
 ```{r question}
-ggplot(episode_metrics, aes(season, question_ratio)) +
-  geom_col() +
-  labs(title = "Season with the most questions",
+episode_metrics %>%
+  group_by(season) %>%
+  summarise(average_qr = mean(question_ratio, na.rm = TRUE)) %>%
+  ggplot(aes
+         (x = season, y = average_qr)) +
+  geom_col(fill = "#B28142") +
+  labs(title = "Average Question Ratio per Season",
        x = "Season",
-       y = "Number of questions")
+       y = "Average question ratio") +
+  theme_classic() 
 ```
 
-correlation of questions and exlamations
+I choose the color to matach the color of burger buns!
+
+I am predicting that the ratio of questions and exlamations in the dialogue will correlate significantly.
 ```{r corr}
 ggplot(episode_metrics, aes(question_ratio, exclamation_ratio)) +
   geom_point() +
   geom_smooth(method = "lm") +
   labs(title = "Correlation of questions and exclamations",
-       x = "Number of questions",
-       y = "Number of exclamations")+
+       x = "Ratio of Questions",
+       y = "Ratio of Exclamations")+
   theme_classic()
 ```
-dialogue density
+
+```{r corr-test}
+cor.test(episode_metrics$question_ratio, episode_metrics$exclamation_ratio, method = "pearson")
+
+```
+
+
+dialogue density ***exploratory**
 ```{r dialogue density}
 ggplot(episode_metrics, aes(x = season, y = dialogue_density)) +
   geom_point() +
@@ -62,9 +76,8 @@ ggplot(episode_metrics, aes(AFINN_abs, exclamation_ratio)) +
   scale_colour_viridis_c(option = "plasma")
 ```
 
-because "Linn" is annoying, i have to check if this is significant
-```{r Linn}
+
+```{r Linnmademedothis}
 cor.test(episode_metrics$AFINN_abs, episode_metrics$exclamation_ratio, method = "pearson")
 
 ```
-Here i want to check to make sure this isn't driven primarily by only the negative or positive scores

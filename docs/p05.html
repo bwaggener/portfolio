@@ -13,7 +13,7 @@
 
 <title>Portfolio 5</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,109 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<pre class="r"><code>library(tidytuesdayR)</code></pre>
+<pre><code>## Warning: package &#39;tidytuesdayR&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(ggplot2)</code></pre>
+<pre class="r"><code>tuesdata &lt;- tidytuesdayR::tt_load(&#39;2024-11-19&#39;)</code></pre>
+<pre><code>## ---- Compiling #TidyTuesday Information for 2024-11-19 ----
+## --- There is 1 file available ---
+## 
+## 
+## ── Downloading files ───────────────────────────────────────────────────────────
+## 
+##   1 of 1: &quot;episode_metrics.csv&quot;</code></pre>
+<pre class="r"><code>episode_metrics &lt;- tuesdata$episode_metrics</code></pre>
+<p>What season has the most questions?</p>
+<pre class="r"><code>episode_metrics %&gt;%
+  group_by(season) %&gt;%
+  summarise(average_qr = mean(question_ratio, na.rm = TRUE)) %&gt;%
+  ggplot(aes
+         (x = season, y = average_qr)) +
+  geom_col(fill = &quot;#B28142&quot;) +
+  labs(title = &quot;Average Question Ratio per Season&quot;,
+       x = &quot;Season&quot;,
+       y = &quot;Average question ratio&quot;) +
+  theme_classic() </code></pre>
+<p><img src="p05_files/figure-html/question-1.png" width="672" /></p>
+<p>I choose the color to matach the color of burger buns!</p>
+<p>I am predicting that the ratio of questions and exlamations in the
+dialogue will correlate significantly.</p>
+<pre class="r"><code>ggplot(episode_metrics, aes(question_ratio, exclamation_ratio)) +
+  geom_point() +
+  geom_smooth(method = &quot;lm&quot;) +
+  labs(title = &quot;Correlation of questions and exclamations&quot;,
+       x = &quot;Ratio of Questions&quot;,
+       y = &quot;Ratio of Exclamations&quot;)+
+  theme_classic()</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="p05_files/figure-html/corr-1.png" width="672" /></p>
+<pre class="r"><code>cor.test(episode_metrics$question_ratio, episode_metrics$exclamation_ratio, method = &quot;pearson&quot;)</code></pre>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  episode_metrics$question_ratio and episode_metrics$exclamation_ratio
+## t = 5.2464, df = 270, p-value = 3.14e-07
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.1921724 0.4083206
+## sample estimates:
+##       cor 
+## 0.3041561</code></pre>
+<p>dialogue density *<strong>exploratory</strong></p>
+<pre class="r"><code>ggplot(episode_metrics, aes(x = season, y = dialogue_density)) +
+  geom_point() +
+  labs(title = &quot;Dialogue density&quot;,
+       x = &quot;Season&quot;,
+       y = &quot;Dialogue density&quot;)</code></pre>
+<p><img src="p05_files/figure-html/dialogue%20density-1.png" width="672" /></p>
+<p>I predict that an absolute value of sentiment variance (I realized
+afterwards that although AFINN scores can be negative, none of the
+episodes had a negative score so this turning this into an absolute
+value was unnecessary) will be positively correlated with ratio of
+exclamations</p>
+<pre class="r"><code>library(viridis)</code></pre>
+<pre><code>## Warning: package &#39;viridis&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Loading required package: viridisLite</code></pre>
+<pre class="r"><code>episode_metrics &lt;- episode_metrics %&gt;%
+  mutate(AFINN_abs = abs(sentiment_variance))
+
+ggplot(episode_metrics, aes(AFINN_abs, exclamation_ratio)) +
+  geom_point(aes(color = season)) +
+  geom_smooth(method = &quot;lm&quot;, color = &quot;black&quot;) +
+  labs(title = &quot;Correlation of AFINN Scores of and Ratio of Exclamations in Bobs Burger Episodes&quot;,
+       x = &quot;AFINN Score&quot;,
+       y = &quot;Ratio of Exclamations&quot;,
+       color = &quot;Season&quot;
+      )+
+  theme_classic()+ 
+  scale_colour_viridis_c(option = &quot;plasma&quot;)</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="p05_files/figure-html/AFINN-exclam-1.png" width="672" /></p>
+<pre class="r"><code>cor.test(episode_metrics$AFINN_abs, episode_metrics$exclamation_ratio, method = &quot;pearson&quot;)</code></pre>
+<pre><code>## 
+##  Pearson&#39;s product-moment correlation
+## 
+## data:  episode_metrics$AFINN_abs and episode_metrics$exclamation_ratio
+## t = 3.0838, df = 270, p-value = 0.002256
+## alternative hypothesis: true correlation is not equal to 0
+## 95 percent confidence interval:
+##  0.06698705 0.29687562
+## sample estimates:
+##      cor 
+## 0.184453</code></pre>
 
 
 
