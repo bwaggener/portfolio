@@ -128,20 +128,83 @@ ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = release_year)) +
   )
 ```
 
-##violin_avgage
-```{r violinplotforaverageagebyyear}
-ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = ave_age_at_top_500)) +
+##spotify popularity
+```{r spotify}
+rolling_stone_long %>%
+  ggplot(aes(x = rank, y = spotify_popularity)) +
+  geom_jitter(width = 0.5, height = 0.5, alpha = 0.5) +
+  scale_x_reverse() +
+  theme_classic() +
+  labs(
+    title = "Spotify Popularity by Rolling Stone Album Rank",
+    x = "Album Rank (Lower is Better)",
+    y = "Spotify Popularity"
+  ) +
+  facet_wrap(~rs_year)
+
+```
+
+## peak billboard potision
+```{r peakbillboardposition}
+rolling_stone_long %>%
+  ggplot(aes(x = peak_billboard_position, y = spotify_popularity)) +
+  geom_jitter(width = 0.5, height = 0.5, alpha = 0.5) +
+  scale_x_reverse() +
+  theme_classic() +
+  labs(
+    title = "Spotify Popularity by Rolling Stone Album Rank",
+    x = "Peak Billboard Position",
+    y = "Spotify Popularity"
+  ) +
+  facet_wrap(~rs_year)
+```
+
+##artist member count
+```{r artist_member_count}
+ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = artist_member_count)) +
   geom_violin(trim = FALSE, fill = "lightblue", color = "darkblue") +  # Create the violin plot
   theme_classic() +  # Use a clean theme
   labs(
     x = "Rolling Stone Rank Year",  # Label for x-axis
-    y = "Album Release Year",       # Label for y-axis
-    title = "Distribution of Release Year"
+    y = "Artist Member Count",       # Label for y-axis
+    title = "Number of Band Members"
   ) +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
   )
 ```
+##artist member count X rank
+```{r artistnumberandrank}
+ggplot(rolling_stone_long, aes(x = rank, y = artist_member_count)) +
+  geom_jitter(width = 0.5, height = 0.5, alpha = 0.5) +
+  scale_x_reverse() +
+  theme_classic() +
+  labs(
+    title = "Artist Member Count by Rolling Stone Album Rank",
+    x = "Album Rank (Lower is Better)",
+    y = "Artist Member Count"
+  )+
+  facet_wrap(~rs_year)
+```
+
+
+```{r lm}
+library(dplyr)
+library(broom)
+
+# Group by year and run separate models
+models_by_year <- rolling_stone_long %>%
+  group_by(rs_year) %>%
+  nest() %>%
+  mutate(model = map(data, ~ lm(rank ~ artist_gender + spotify_popularity + weeks_on_billboard +
+                                artist_member_count + release_year, data = .x)),
+         results = map(model, tidy))
+
+# View all results
+models_by_year %>% select(rs_year, results) %>% unnest(results)
+```
 
 #hypothesis
 *Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity. Hypothesis: there are more changes (i.e, genre, release year, ranking shift, etc.) between 2012 and 2020 compared to 2003 and 2012 and these shifts are driven by the medium that people are using to listen to music*
+
+I will explore this in my next portfolio piece
