@@ -15,7 +15,6 @@ library(forcats)
 #RollingStone Data
 For this portfolio, i am exploring the tidytuesday data on Rolling Stone Album Rankings.
 
-*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity*
 
 ```{r getdata}
 rolling_stone <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-05-07/rolling_stone.csv')
@@ -113,3 +112,36 @@ print(genre_table)
 genre_table <- genre_table %>%
   mutate(diff_2003_2020 = `2020` - `2003`)
 ```
+
+##violin_year
+```{r violine_by_year}
+ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = release_year)) +
+  geom_violin(trim = FALSE, fill = "lightblue", color = "darkblue") +  # Create the violin plot
+  theme_classic() +  # Use a clean theme
+  labs(
+    x = "Rolling Stone Rank Year",  # Label for x-axis
+    y = "Album Release Year",       # Label for y-axis
+    title = "Distribution of Release Year"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+```
+
+##violin_avgage
+```{r violinplotforaverageagebyyear}
+ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = ave_age_at_top_500)) +
+  geom_violin(trim = FALSE, fill = "lightblue", color = "darkblue") +  # Create the violin plot
+  theme_classic() +  # Use a clean theme
+  labs(
+    x = "Rolling Stone Rank Year",  # Label for x-axis
+    y = "Album Release Year",       # Label for y-axis
+    title = "Distribution of Release Year"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+```
+
+#hypothesis
+*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity. Hypothesis: there are more changes (i.e, genre, release year, ranking shift, etc.) between 2012 and 2020 compared to 2003 and 2012 and these shifts are driven by the medium that people are using to listen to music*

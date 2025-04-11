@@ -13,7 +13,7 @@
 
 <title>Portfolio 7</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,153 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<p>#libraries</p>
+<pre class="r"><code>library(tidytuesdayR)</code></pre>
+<pre><code>## Warning: package &#39;tidytuesdayR&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(forcats)</code></pre>
+<p>#RollingStone Data For this portfolio, i am exploring the tidytuesday
+data on Rolling Stone Album Rankings.</p>
+<p><em>Might analyze something about how from 2003, 2012, and then 2020
+there are shifts in which albums are included??? possible changes in
+release_year or genre or spotify popularity</em></p>
+<pre class="r"><code>rolling_stone &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-05-07/rolling_stone.csv&#39;)</code></pre>
+<pre><code>## Rows: 691 Columns: 21
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr  (8): sort_name, clean_name, album, genre, type, spotify_url, artist_gen...
+## dbl (13): rank_2003, rank_2012, rank_2020, differential, release_year, weeks...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>#convert to long</p>
+<pre class="r"><code>rolling_stone_long &lt;- rolling_stone %&gt;%
+  pivot_longer(
+    cols = starts_with(&quot;rank_&quot;),
+    names_to = &quot;rs_year&quot;,
+    names_prefix = &quot;rank_&quot;,
+    values_to = &quot;rank&quot;
+  ) %&gt;%
+  filter(!is.na(rank)) %&gt;%  
+    mutate(rs_year = as.integer(rs_year))</code></pre>
+<p>#Link to variable info <a
+href="https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-05-07/readme.md"
+class="uri">https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-05-07/readme.md</a></p>
+<div id="exploration-of-data" class="section level1">
+<h1>Exploration of data</h1>
+<div id="plotting-by-year" class="section level2">
+<h2>plotting by year</h2>
+<pre class="r"><code>rolling_stone %&gt;%
+  ggplot(aes(x = release_year)) +
+  geom_histogram() +
+  scale_x_continuous(breaks = seq(1950, 2020, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 10)) +
+  labs(title = &quot;Rolling Stone Album Rankings for 2024&quot;,
+       x = &quot;Release Year&quot;,
+       y = &quot;Frequency&quot;) +
+  theme_classic()</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="p07_files/figure-html/year-1.png" width="672" /></p>
+<p>##diff by year</p>
+<pre class="r"><code>rolling_stone %&gt;%
+  ggplot(aes(x = release_year, y = differential)) +
+  geom_point() +
+  scale_x_continuous(breaks = seq(1950, 2020, by = 5)) +
+  scale_y_continuous(breaks = seq(-500, 500, by = 50)) +
+  labs(title = &quot;Rolling Stone Album Rankings for 2024&quot;,
+       x = &quot;Release Year&quot;,
+       y = &quot;Change in Ranking From 2003 to 2020&quot;) +
+  theme_classic()</code></pre>
+<p><img src="p07_files/figure-html/diff_by_year_plot-1.png" width="672" /></p>
+</div>
+<div id="genre" class="section level2">
+<h2>genre</h2>
+<pre class="r"><code>rolling_stone %&gt;%
+  mutate(genre = fct_infreq(genre)) %&gt;%
+  ggplot(aes(x = genre)) +
+  geom_bar() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  labs(x = &quot;Genre&quot;, y = &quot;Number of Albums&quot;, title = &quot;Album Counts by Genre&quot;)</code></pre>
+<p><img src="p07_files/figure-html/genre-1.png" width="672" /></p>
+</div>
+<div id="genre-by-rs_year" class="section level2">
+<h2>genre by rs_year</h2>
+<pre class="r"><code>rolling_stone_long %&gt;%
+  mutate(genre = fct_infreq(genre)) %&gt;%
+  ggplot(aes(x = genre)) +
+  geom_bar() +
+  facet_wrap(~rs_year) +  # Facet by year (e.g., 2003, 2012, 2020)
+  theme_classic() +
+  theme(
+    axis.text.x = element_text(angle = 60, hjust = 1),
+    strip.background = element_blank(),
+    strip.text = element_text(face = &quot;bold&quot;)
+  ) +
+  labs(
+    x = &quot;Genre&quot;,
+    y = &quot;Number of Albums&quot;,
+    title = &quot;Album Counts by Genre Across Rolling Stone Rankings&quot;
+  )</code></pre>
+<p><img src="p07_files/figure-html/genre_facet-1.png" width="672" /></p>
+</div>
+<div id="genre-by-rs_year-table" class="section level2">
+<h2>genre by rs_year table</h2>
+<pre class="r"><code>genre_table &lt;- rolling_stone_long %&gt;%
+  count(rs_year, genre) %&gt;%
+  pivot_wider(names_from = rs_year, values_from = n, values_fill = 0)
+print(genre_table)</code></pre>
+<pre><code>## # A tibble: 17 × 4
+##    genre                               `2003` `2012` `2020`
+##    &lt;chr&gt;                                &lt;int&gt;  &lt;int&gt;  &lt;int&gt;
+##  1 Big Band/Jazz                           10     10     10
+##  2 Blues/Blues ROck                         1      1      1
+##  3 Blues/Blues Rock                        60     61     28
+##  4 Country/Folk/Country Rock/Folk Rock     36     38     40
+##  5 Electronic                               7      6     11
+##  6 Funk/Disco                              15     15     19
+##  7 Hard Rock/Metal                         25     22     18
+##  8 Hip-Hop/Rap                             26     30     57
+##  9 Indie/Alternative Rock                  35     41     47
+## 10 Latin                                    1      1      6
+## 11 Punk/Post-Punk/New Wave/Power Pop       71     70     57
+## 12 Reggae                                   7      7      5
+## 13 Rock n&#39; Roll/Rhythm &amp; Blues             10     10      9
+## 14 Singer-Songwriter/Heartland Rock        26     26     15
+## 15 Soul/Gospel/R&amp;B                         45     45     65
+## 16 &lt;NA&gt;                                   125    117    110
+## 17 Afrobeat                                 0      0      2</code></pre>
+<pre class="r"><code>genre_table &lt;- genre_table %&gt;%
+  mutate(diff_2003_2020 = `2020` - `2003`)</code></pre>
+<p>##violin_year</p>
+<pre class="r"><code>ggplot(rolling_stone_long, aes(x = as.factor(rs_year), y = release_year)) +
+  geom_violin(trim = FALSE, fill = &quot;lightblue&quot;, color = &quot;darkblue&quot;) +  # Create the violin plot
+  theme_classic() +  # Use a clean theme
+  labs(
+    x = &quot;Rolling Stone Rank Year&quot;,  # Label for x-axis
+    y = &quot;Album Release Year&quot;,       # Label for y-axis
+    title = &quot;Distribution of Release Year&quot;
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )</code></pre>
+<p><img src="p07_files/figure-html/violine_by_year-1.png" width="672" /></p>
+</div>
+</div>
 
 
 
