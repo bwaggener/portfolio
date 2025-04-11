@@ -13,7 +13,7 @@
 
 <title>Portfolio 6</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,853 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<p>This project is to remake my graphs from line graphs to bar
+graphs</p>
+<p>Here is what i had before #graphs that need to be fixed</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(extrafont)</code></pre>
+<pre><code>## Registering fonts with R</code></pre>
+<pre class="r"><code>library(gridExtra)</code></pre>
+<pre><code>## Warning: package &#39;gridExtra&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## 
+## Attaching package: &#39;gridExtra&#39;
+## 
+## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     combine</code></pre>
+<pre class="r"><code>means &lt;- c(9.17, 8.59, 5.67, 6.56, 3.11, 3.19, 5.65, 4.23, 8.70, 9.86, 3.33, 4.15, 7.90, 5.86, 3.16, 2.15)
+se &lt;- c(.112, .104, .176, .131, .149, .119, .169, .131, .169, .086, .177, .121, .150, .125, .173, .091)
+happiness &lt;- c(&quot;high happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;)
+political_orientation &lt;- c(&quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;)
+society_type &lt;- c(&quot;hmhh&quot;, &quot;hmhh&quot;, &quot;lmhh&quot;, &quot;lmhh&quot;, &quot;lmlh&quot;, &quot;lmlh&quot;,&quot;hmlh&quot;, &quot;hmlh&quot;, &quot;hehh&quot;, &quot;hehh&quot;, &quot;helh&quot;, &quot;helh&quot;, &quot;lehh&quot;, &quot;lehh&quot;, &quot;lelh&quot;, &quot;lelh&quot;)
+df_3 &lt;- data.frame(means, se, happiness, political_orientation, society_type)
+
+
+df_3 &lt;- df_3 %&gt;%
+  mutate(
+    happiness = fct_relevel(happiness, &quot;low happiness&quot;, &quot;high happiness&quot;))</code></pre>
+<pre class="r"><code>df_3 &lt;- df_3 %&gt;%
+  mutate(society_type = case_when(
+    str_detect(society_type, &quot;lm&quot;) ~ &quot;Low Meritocracy/High Equality&quot;,
+    str_detect(society_type, &quot;hm&quot;) ~ &quot;High Meritocracy/Low Equality&quot;,
+    str_detect(society_type, &quot;le&quot;) ~ &quot;Low Equality&quot;,
+    str_detect(society_type, &quot;he&quot;) ~ &quot;High Equality&quot;,
+    TRUE ~ society_type  # Keeps the original value if none of the conditions match
+  ))
+df_3&lt;- df_3 %&gt;%
+  mutate(happiness_numeric = ifelse(happiness == &quot;low happiness&quot;, 0, 1))
+
+df_3_meri &lt;- df_3 %&gt;%
+  filter(society_type %in% c(&quot;Low Meritocracy/High Equality&quot;, &quot;High Meritocracy/Low Equality&quot;))
+
+# Filter for &quot;Low Equality&quot; or &quot;High Equality&quot;
+df_3_eq &lt;- df_3 %&gt;%
+  filter(society_type %in% c(&quot;Low Equality&quot;, &quot;High Equality&quot;))</code></pre>
+<pre class="r"><code>df_3_meri_plot &lt;- ggplot(df_3_meri, 
+  aes(x = happiness_numeric + ifelse(society_type == &quot;High Meritocracy/Low Equality&quot;, 0.1, -0.1), 
+      y = means, color = political_orientation, 
+      group = interaction(political_orientation, society_type), 
+      linetype = society_type)) +  
+  geom_point(shape = 20, size = 5) +  # Points for means
+  geom_line(linewidth = .5) + 
+  geom_errorbar(aes(ymin = means - se, ymax = means + se), width = 0.05, linewidth = 0.5) +# Connecting means
+  scale_color_manual(
+    values = c(&quot;cons&quot; = &quot;red&quot;, &quot;lib&quot; = &quot;blue&quot;), 
+    name = &quot;Political Orientation&quot;, 
+    labels = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;)
+  ) + 
+  scale_linetype_manual(values = c(&quot;Low Meritocracy/High Equality&quot; = &quot;solid&quot;, &quot;High Meritocracy/Low Equality&quot; = &quot;dashed&quot;)) +  # Line types for violations
+  scale_x_continuous(
+    breaks = c(0, 1),
+    labels = c(&quot;Low Happiness&quot;, &quot;High Happiness&quot;)
+  ) +
+  scale_y_continuous(breaks = seq(1, 11, by = 1), limits = c(1, 11)) + 
+  labs(
+    title = NULL,
+    x = NULL,
+    y = &quot;Ideal Society Rating&quot;,
+    color = &quot;Political Orientation&quot;,
+    linetype = &quot;Society Type&quot;
+  ) + 
+  theme_classic() + 
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 12),
+    legend.position = &quot;right&quot;,
+    axis.text.x = element_text(size = 12),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 12)
+  )
+
+print(df_3_meri_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig-1.png" width="672" /></p>
+<p>Here is what did to fix them</p>
+<pre class="r"><code>means &lt;- c(9.17, 8.59, 5.67, 6.56, 3.11, 3.19, 5.65, 4.23, 8.70, 9.86, 3.33, 4.15, 7.90, 5.86, 3.16, 2.15)
+se &lt;- c(.112, .104, .176, .131, .149, .119, .169, .131, .169, .086, .177, .121, .150, .125, .173, .091)
+happiness &lt;- c(&quot;high happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;)
+political_orientation &lt;- c(&quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;)
+society_type &lt;- c(&quot;hmhh&quot;, &quot;hmhh&quot;, &quot;lmhh&quot;, &quot;lmhh&quot;, &quot;lmlh&quot;, &quot;lmlh&quot;,&quot;hmlh&quot;, &quot;hmlh&quot;, &quot;hehh&quot;, &quot;hehh&quot;, &quot;helh&quot;, &quot;helh&quot;, &quot;lehh&quot;, &quot;lehh&quot;, &quot;lelh&quot;, &quot;lelh&quot;)
+df_stdy3 &lt;- data.frame(means, se, happiness, political_orientation, society_type)
+
+
+df_stdy3 &lt;- df_stdy3 %&gt;%
+  mutate(
+    happiness = fct_relevel(happiness, &quot;low happiness&quot;, &quot;high happiness&quot;))</code></pre>
+<pre class="r"><code>df_stdy3 &lt;- df_stdy3 %&gt;%
+  mutate(society_type = case_when(
+    str_detect(society_type, &quot;lm&quot;) ~ &quot;Low Meritocracy/High Equality&quot;,
+    str_detect(society_type, &quot;hm&quot;) ~ &quot;High Meritocracy/Low Equality&quot;,
+    str_detect(society_type, &quot;le&quot;) ~ &quot;Low Equality&quot;,
+    str_detect(society_type, &quot;he&quot;) ~ &quot;High Equality&quot;,
+    TRUE ~ society_type  # Keeps the original value if none of the conditions match
+  ))
+df_stdy3&lt;- df_stdy3 %&gt;%
+  mutate(happiness_numeric = ifelse(happiness == &quot;low happiness&quot;, 0, 1))
+
+df_stdy3_meri &lt;- df_stdy3 %&gt;%
+  filter(society_type %in% c(&quot;Low Meritocracy/High Equality&quot;, &quot;High Meritocracy/Low Equality&quot;))
+
+# Filter for &quot;Low Equality&quot; or &quot;High Equality&quot;
+df_stdy3_eq &lt;- df_stdy3 %&gt;%
+  filter(society_type %in% c(&quot;Low Equality&quot;, &quot;High Equality&quot;))
+
+df_stdy3_meri$society_type &lt;- factor(
+  df_stdy3_meri$society_type,
+  levels = c(&quot;Low Meritocracy/High Equality&quot;, &quot;High Meritocracy/Low Equality&quot;))
+
+df_stdy3_meri$happiness_numeric &lt;- factor(df_stdy3_meri$happiness_numeric, 
+                                           levels = c(0, 1), 
+                                           labels = c(&quot;Low&quot;, &quot;High&quot;))
+df_stdy3_eq$happiness_numeric &lt;- factor(df_stdy3_eq$happiness_numeric, 
+                                           levels = c(0, 1), 
+                                           labels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##stdy3 ###fig1_stdy3A</p>
+<pre class="r"><code>df_stdy3_meri_plot_bar &lt;- ggplot(df_stdy3_meri, aes(x = happiness_numeric, y = means, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = means - se, ymax = means + se), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;High Meritocracy/Low Equality&quot; = &quot;gray50&quot;, 
+                               &quot;Low Meritocracy/High Equality&quot; = &quot;gray80&quot;)) +  # Bar fill colors
+  scale_y_continuous(
+    breaks = seq(1, 11, by = 1)
+  ) + 
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Society Type:&quot;
+  ) + 
+  theme_classic() + 
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10),
+    legend.position = &quot;bottom&quot;,  # Legend at the bottom
+    legend.key.size = unit(0.5, &quot;cm&quot;),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)
+  ) +
+   facet_wrap(~political_orientation, scales = &quot;fixed&quot;, labeller = labeller(political_orientation = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;))) +
+  coord_cartesian(ylim = c(1, 11))
+
+print(df_stdy3_meri_plot_bar)</code></pre>
+<p><img src="p06_files/figure-html/fig1_stdy3A-1.png" width="672" />
+###fig2_stdy3B</p>
+<pre class="r"><code>df_stdy3_eq_plot &lt;- ggplot(df_stdy3_eq, aes(x = happiness_numeric, y = means, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = means - se, ymax = means + se), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Low Equality&quot; = &quot;gray50&quot;, 
+                               &quot;High Equality&quot; = &quot;gray80&quot;)) +  # Bar fill colors
+  scale_y_continuous(
+    breaks = seq(1, 11, by = 1)
+  ) + 
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Society Type:&quot;
+  ) + 
+  theme_classic() + 
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10),
+    legend.position = &quot;bottom&quot;,  # Legend at the bottom
+    legend.key.size = unit(0.5, &quot;cm&quot;),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)
+  ) +
+   facet_wrap(~political_orientation, scales = &quot;fixed&quot;, labeller = labeller(political_orientation = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;))) +
+  coord_cartesian(ylim = c(1, 11))
+
+print(df_stdy3_eq_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig2_stdy3B-1.png" width="672" /></p>
+<p>#hypothesis</p>
+<p>I will make two graphs. The first will depict the more intuitive
+results (two main effects–John’s question from the defense). The next
+graph will show our hypothesis.</p>
+<pre class="r"><code>isr &lt;- c(5,3,10,8)
+happiness &lt;- c(&quot;Low Happiness&quot;, &quot;Low Happiness&quot;, &quot;High Happiness&quot;, &quot;High Happiness&quot;)
+violation &lt;- c(&quot;No Violation&quot;, &quot;Violation&quot;, &quot;No Violation&quot;, &quot;Violation&quot;)
+intuit &lt;- data.frame(isr, happiness, violation)
+
+intuit &lt;- intuit %&gt;%
+  mutate(
+    happiness = fct_relevel(happiness, &quot;Low Happiness&quot;, &quot;High Happiness&quot;)
+  )</code></pre>
+<p>###fig4_hyp_intuit</p>
+<pre class="r"><code>fig4_intuit &lt;- ggplot(intuit, aes(x = happiness, y = isr, fill = violation)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;)+
+  scale_fill_manual(values = c(&quot;No Violation&quot; = &quot;gray80&quot;, &quot;Violation&quot; = &quot;gray50&quot;)) +  # Fill colors for bars
+  scale_y_continuous(breaks = 1:11) +  # Y-axis scale
+  coord_cartesian(ylim = c(1, 11)) +
+  theme_classic() +
+  theme( 
+    text = element_text(family = &quot;Times New Roman&quot;),
+    axis.text.x = element_text(family = &quot;Times New Roman&quot;, size = 12),    # Match the font of the x-axis labels
+    axis.title.y = element_text(family = &quot;Times New Roman&quot;, size = 12)
+  ) +
+  labs(
+    title = NULL,
+    x = NULL,
+    y = &quot;Ideal Society Rating&quot;,
+    fill = &quot;Violation&quot;
+  )
+
+print(fig4_intuit)</code></pre>
+<p><img src="p06_files/figure-html/fig_4-1.png" width="672" /></p>
+<pre class="r"><code>isr &lt;- c(5,3,10,4)
+happiness &lt;- c(&quot;Low Happiness&quot;, &quot;Low Happiness&quot;, &quot;High Happiness&quot;, &quot;High Happiness&quot;)
+violation &lt;- c(&quot;No Violation&quot;, &quot;Violation&quot;, &quot;No Violation&quot;, &quot;Violation&quot;)
+predicted &lt;- data.frame(isr, happiness, violation)
+
+predicted &lt;- predicted %&gt;%
+  mutate(
+    happiness = fct_relevel(happiness, &quot;Low Happiness&quot;, &quot;High Happiness&quot;)
+  )</code></pre>
+<p>###fig3_hyp_prediction</p>
+<pre class="r"><code>fig3_predicted &lt;-ggplot(predicted, aes(x = happiness, y = isr, fill = violation)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;)+
+  scale_fill_manual(values = c(&quot;No Violation&quot; = &quot;gray80&quot;, &quot;Violation&quot; = &quot;gray50&quot;)) +
+   scale_y_continuous(breaks = 1:11) + 
+    coord_cartesian(ylim = c(1, 11)) +
+  theme_classic()+  
+  theme( 
+    text = element_text(family = &quot;Times New Roman&quot;),
+    axis.text.x = element_text(family = &quot;Times New Roman&quot;, size = 12),    # Match the font of the x-axis labels
+    axis.title.y = element_text(family = &quot;Times New Roman&quot;, size = 12)
+  ) +
+  labs(
+    title = NULL,
+    x = NULL,
+    y = &quot;Ideal Society Rating&quot;,
+    fill = &quot;Violation&quot;
+  )
+
+
+print(fig3_predicted)</code></pre>
+<p><img src="p06_files/figure-html/fig_3-1.png" width="672" /></p>
+<p>##three-way</p>
+<pre class="r"><code>ideal_society_ratings &lt;- c(4, 2, 8, 6, 2, 3, 3, 7)
+happiness &lt;- c(&quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;, &quot;low happiness&quot;, &quot;low happiness&quot;, &quot;high happiness&quot;, &quot;high happiness&quot;)
+political_orientation &lt;- c(&quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;, &quot;cons&quot;, &quot;lib&quot;)
+society_type &lt;- c(&quot;no violation&quot;, &quot;no violation&quot;, &quot;no violation&quot;, &quot;no violation&quot;, &quot;violation&quot;, &quot;violation&quot;, &quot;violation&quot;, &quot;violation&quot;)
+df_hyp_tw &lt;- data.frame(ideal_society_ratings, happiness, political_orientation, society_type)
+
+
+df_hyp_tw &lt;- df_hyp_tw %&gt;%
+  mutate(
+    happiness = fct_relevel(happiness, &quot;low happiness&quot;, &quot;high happiness&quot;))
+df_hyp_tw$happiness &lt;- factor(df_hyp_tw$happiness, levels = c(&quot;low happiness&quot;, &quot;high happiness&quot;), labels = c(&quot;Low Happiness&quot;, &quot;High Happiness&quot;))
+df_hyp_tw$society_type &lt;- factor(df_hyp_tw$society_type, 
+                                 levels = c(&quot;no violation&quot;, &quot;violation&quot;), 
+                                 labels = c(&quot;Conservative Values Are Not Violated&quot;, &quot;Conservative Values Are Violated&quot;))</code></pre>
+<p>###fig5_hyp_three-way</p>
+<pre class="r"><code>fig5_tw_predicted &lt;- ggplot(df_hyp_tw, aes(x = happiness, y = ideal_society_ratings, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  scale_fill_manual(values = c(&quot;Conservative Values Are Not Violated&quot; = &quot;gray80&quot;, &quot;Conservative Values Are Violated&quot; = &quot;gray50&quot;)) +  # Bar fill colors
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) + 
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Ideal Society Rating&quot;,
+    fill = &quot;Society Type:&quot;
+  ) + 
+  theme_classic() + 
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10),
+    legend.position = &quot;bottom&quot;,  # Legend at the bottom
+    legend.key.size = unit(0.5, &quot;cm&quot;),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)
+  ) +
+  facet_wrap(~political_orientation, scales = &quot;fixed&quot;, labeller = labeller(political_orientation = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;))) +
+  coord_cartesian(ylim = c(1, 11))
+
+print(fig5_tw_predicted)</code></pre>
+<p><img src="p06_files/figure-html/fig5_hyp_three-way-1.png" width="672" /></p>
+<p>#RESULTS #data_means_se</p>
+<pre class="r"><code>df_4 &lt;- tibble(
+  poli_ori = rep(c(&quot;Conservative&quot;, &quot;Liberal&quot;), each = 8),
+  society_type = rep(c(&quot;LF&quot;, &quot;LF&quot;, &quot;HF&quot;, &quot;HF&quot;, &quot;LR&quot;, &quot;LR&quot;, &quot;HR&quot;, &quot;HR&quot;), 2),
+  happiness = rep(c(&quot;low happiness&quot;, &quot;high happiness&quot;), times = 8),
+  mean = c(
+    2.627706, 6.341991, 4.904762, 9.835498, 2.816479, 6.996255, 4.501873, 9.591760,
+    3.570370, 9.462963, 2.714815, 7.644444, 3.208696, 9.786957, 2.426087, 7.286957
+  ),
+  se = c(
+    0.14978388, 0.17792659, 0.18200138, 0.09402925, 0.13939406, 0.18727943, 0.16487943, 0.10800660,
+    0.13674704, 0.10169496, 0.12955408, 0.13962178, 0.14105724, 0.09826295, 0.11263820, 0.18399305
+  )
+) |&gt;
+  mutate(
+    happiness = fct_relevel(happiness, &quot;low happiness&quot;, &quot;high happiness&quot;),
+    happiness_numeric = if_else(happiness == &quot;low happiness&quot;, 0, 1)
+  )
+
+# Filter subsets
+famval &lt;- df_4 %&gt;% filter(str_detect(society_type, &quot;F&quot;))
+Christ &lt;- df_4 %&gt;% filter(str_detect(society_type, &quot;R&quot;))</code></pre>
+<p>##fig6_fam_means</p>
+<pre class="r"><code>famval_means &lt;- ggplot(famval, aes(x = happiness, y = mean, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(
+    aes(ymin = mean - se, ymax = mean + se),
+    width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(
+    values = c(&quot;LF&quot; = &quot;gray50&quot;, &quot;HF&quot; = &quot;gray80&quot;),
+    labels = c(
+      &quot;LF&quot; = &quot;Nontraditional Family Values&quot;,
+      &quot;HF&quot; = &quot;Traditional Family Values&quot;
+    )
+  ) +
+  
+  scale_y_continuous(
+    breaks = seq(1, 11, by = 1)
+  ) +
+  
+  scale_x_discrete(
+    labels = c(&quot;low happiness&quot; = &quot;Low&quot;, &quot;high happiness&quot; = &quot;High&quot;)
+  ) +
+  
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Society Type:&quot;
+  ) +
+  
+  theme_classic() +
+  
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10),
+    legend.position = &quot;bottom&quot;,
+    legend.key.size = unit(0.5, &quot;cm&quot;),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)
+  ) +
+  
+  facet_wrap(
+    ~poli_ori,
+    labeller = labeller(political_orientation = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;))
+  ) +
+  
+  coord_cartesian(ylim = c(1, 11))
+
+# Print and save
+print(famval_means)</code></pre>
+<p><img src="p06_files/figure-html/fig6_famval_means-1.png" width="672" /></p>
+<p>##fig12_chris_means</p>
+<pre class="r"><code>christ_means &lt;- ggplot(Christ, aes(x = happiness, y = mean, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(
+    aes(ymin = mean - se, ymax = mean + se),
+    width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(
+    values = c(&quot;LR&quot; = &quot;gray50&quot;, &quot;HR&quot; = &quot;gray80&quot;),
+    labels = c(
+      &quot;LR&quot; = &quot;Christianity is Unimportant&quot;,
+      &quot;HR&quot; = &quot;Christianity is Important&quot;
+    )
+  ) +
+  
+  scale_y_continuous(
+    breaks = seq(1, 11, by = 1)
+  ) +
+  
+  scale_x_discrete(
+    labels = c(&quot;low happiness&quot; = &quot;Low&quot;, &quot;high happiness&quot; = &quot;High&quot;)
+  ) +
+  
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Society Type:&quot;
+  ) +
+  
+  theme_classic() +
+  
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    strip.background = element_blank(),
+    strip.text = element_text(size = 10),
+    legend.position = &quot;bottom&quot;,
+    legend.key.size = unit(0.5, &quot;cm&quot;),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 10)
+  ) +
+  
+  facet_wrap(
+    ~poli_ori,
+    labeller = labeller(political_orientation = c(&quot;cons&quot; = &quot;Conservatives&quot;, &quot;lib&quot; = &quot;Liberals&quot;))
+  ) +
+  
+  coord_cartesian(ylim = c(1, 11))
+
+# Print and save
+print(christ_means)</code></pre>
+<p><img src="p06_files/figure-html/fig12_christ_means-1.png" width="672" /></p>
+<p>#MainEffects ###fam_data</p>
+<pre class="r"><code>fam_main_effects &lt;- tribble(
+  ~isr_mean, ~main_effect, ~se,
+  5.84, &quot;pol0&quot;, 0.070,
+  5.93, &quot;pol1&quot;, 0.076,
+  5.50, &quot;lf&quot;, 0.075,
+  6.27, &quot;hf&quot;, 0.073,
+  3.45, &quot;lh&quot;, 0.090,
+  8.32, &quot;hh&quot;, 0.067
+)
+
+fam_main_effects$facet_group &lt;- rep(c(&quot;pol&quot;, &quot;society&quot;, &quot;happiness&quot;), each = 2)
+df_main_effects &lt;- fam_main_effects %&gt;%
+  mutate(main_effect = factor(main_effect, levels = c(&quot;lh&quot;, &quot;hh&quot;, &quot;pol0&quot;, &quot;pol1&quot;, &quot;lf&quot;, &quot;hf&quot;)))
+
+fam_maineffects_long &lt;- df_main_effects %&gt;%
+  mutate(factor_type = case_when(
+    main_effect %in% c(&quot;pol0&quot;, &quot;pol1&quot;) ~ &quot;Political Orientation&quot;,
+    main_effect %in% c(&quot;lf&quot;, &quot;hf&quot;) ~ &quot;Family Values&quot;,
+    main_effect %in% c(&quot;lh&quot;, &quot;hh&quot;) ~ &quot;Happiness Level&quot;
+  ))</code></pre>
+<p>##fig7_fam_ME</p>
+<pre class="r"><code>fam_maineffect &lt;- ggplot(fam_maineffects_long, aes(x = main_effect, y = isr_mean, fill = main_effect)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = isr_mean - se, ymax = isr_mean + se), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;pol0&quot; = &quot;gray50&quot;, &quot;pol1&quot; = &quot;gray80&quot;, 
+                               &quot;lf&quot; = &quot;gray50&quot;, &quot;hf&quot; = &quot;gray80&quot;, 
+                               &quot;lh&quot; = &quot;gray50&quot;, &quot;hh&quot; = &quot;gray80&quot;)) +
+  scale_x_discrete(labels = c(&quot;pol0&quot; = &quot;Liberal&quot;, &quot;pol1&quot; = &quot;Conservative&quot;, 
+                              &quot;lf&quot; = &quot;Nontraditional&quot;, &quot;hf&quot; = &quot;Traditional&quot;, 
+                              &quot;lh&quot; = &quot;Low&quot;, &quot;hh&quot; = &quot;High&quot;)) +
+  scale_y_continuous(breaks = 1:11) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = NULL,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = NULL
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;,
+    strip.text = element_text(size = 12)  # Add size for facet labels
+  ) +
+  facet_wrap(~factor_type, scales = &quot;free&quot;)  # Facet by factor_type
+
+# Print the combined plot
+print(fam_maineffect)</code></pre>
+<p><img src="p06_files/figure-html/famval_main_effects-1.png" width="672" /></p>
+<p>##christ_data</p>
+<pre class="r"><code>christ_main_effects &lt;- tribble(
+  ~isr_mean, ~main_effect, ~se,
+  5.68, &quot;pol0&quot;, 0.075,
+  5.98, &quot;pol1&quot;, 0.070,
+  5.70, &quot;lr&quot;, 0.079,
+  5.95, &quot;hr&quot;, 0.078,
+  3.24, &quot;lh&quot;, 0.084,
+  8.42, &quot;hh&quot;, 0.071
+)
+
+christ_main_effects$facet_group &lt;- rep(c(&quot;pol&quot;, &quot;society&quot;, &quot;happiness&quot;), each = 2)
+
+# Fix typo in the `mutate()` function and correct variable name
+christ_main_effects &lt;- christ_main_effects %&gt;%
+  mutate(main_effect = factor(main_effect, levels = c(&quot;lh&quot;, &quot;hh&quot;, &quot;pol0&quot;, &quot;pol1&quot;, &quot;lr&quot;, &quot;hr&quot;)))
+
+# Convert data into long format and add a factor type
+christ_maineffects_long &lt;- christ_main_effects %&gt;%
+  mutate(factor_type = case_when(
+    main_effect %in% c(&quot;pol0&quot;, &quot;pol1&quot;) ~ &quot;Political Orientation&quot;,
+    main_effect %in% c(&quot;lr&quot;, &quot;hr&quot;) ~ &quot;Christianity&quot;,
+    main_effect %in% c(&quot;lh&quot;, &quot;hh&quot;) ~ &quot;Happiness Level&quot;
+  ))</code></pre>
+<p>##fig13_christ_ME</p>
+<pre class="r"><code>christ_maineffect &lt;- ggplot(christ_maineffects_long, aes(x = main_effect, y = isr_mean, fill = main_effect)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = isr_mean - se, ymax = isr_mean + se), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;pol0&quot; = &quot;gray50&quot;, &quot;pol1&quot; = &quot;gray80&quot;, 
+                               &quot;lr&quot; = &quot;gray50&quot;, &quot;hr&quot; = &quot;gray80&quot;, 
+                               &quot;lh&quot; = &quot;gray50&quot;, &quot;hh&quot; = &quot;gray80&quot;)) +
+  scale_x_discrete(labels = c(&quot;pol0&quot; = &quot;Liberal&quot;, &quot;pol1&quot; = &quot;Conservative&quot;, 
+                              &quot;lr&quot; = &quot;Unimportant&quot;, &quot;hr&quot; = &quot;Important&quot;, 
+                              &quot;lh&quot; = &quot;Low&quot;, &quot;hh&quot; = &quot;High&quot;)) +
+  scale_y_continuous(breaks = 1:11) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = NULL,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = NULL
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;,
+    strip.text = element_text(size = 12)  # Add size for facet labels
+  ) +
+  facet_wrap(~factor_type, scales = &quot;free&quot;)  # Facet by factor_type
+
+# Print the combined plot
+print(christ_maineffect)</code></pre>
+<p><img src="p06_files/figure-html/fig13_christ_maineffect-1.png" width="672" />
+#two_way ##famval</p>
+<pre class="r"><code>fam_tw_df &lt;- tribble(
+ ~poli_ori, ~Happiness, ~emmean, ~SE,
+  &quot;Liberal&quot;, &quot;Low&quot;, 3.14, 0.1220, 
+  &quot;Conservative&quot;, &quot;Low&quot;, 3.77, 0.1320,
+  &quot;Liberal&quot;, &quot;High&quot;, 8.55, 0.0907,
+  &quot;Conservative&quot;, &quot;High&quot;, 8.09, 0.0981
+)
+
+fam_tw_df$Happiness &lt;- factor(fam_tw_df$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##fig8_famPxH</p>
+<pre class="r"><code>fam_tw_plot &lt;- ggplot(fam_tw_df, aes(x = Happiness, y = emmean, fill = Happiness)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Low&quot; = &quot;gray50&quot;, &quot;High&quot; = &quot;gray80&quot;)) +  # Custom colors for Low and High Happiness
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Happiness Level&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Happiness&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;  # Remove legend if not needed
+  ) +
+  facet_wrap(~poli_ori)  # Facet by poli_ori (Liberal vs Conservative)
+
+# Print the plot
+print(fam_tw_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig8_tw_pxh-1.png" width="672" /></p>
+<pre class="r"><code>fam_tw_ps &lt;- tribble(
+ ~poli_ori, ~society_type, ~emmean, ~SE,
+  &quot;Liberal&quot;, &quot;Nontraditional&quot;, 6.52, 0.10, 
+  &quot;Conservative&quot;, &quot;Nontraditional&quot;, 4.48, 0.11,
+  &quot;Liberal&quot;, &quot;Traditional&quot;, 5.18, 0.099,
+  &quot;Conservative&quot;, &quot;Traditional&quot;, 7.37, 0.11
+)
+fam_tw_ps$society_type &lt;- factor(fam_tw_ps$society_type, levels = c(&quot;Traditional&quot;, &quot;Nontraditional&quot;))</code></pre>
+<p>##fig9_famPxS</p>
+<pre class="r"><code>fam_tw_ps &lt;- ggplot(fam_tw_ps, aes(x = society_type, y = emmean, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Nontraditional&quot; = &quot;gray50&quot;, &quot;Traditional&quot; = &quot;gray80&quot;)) +  # Custom colors for Low and High Happiness
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Family Values&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Society Type&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;  # Remove legend if not needed
+  ) +
+  facet_wrap(~poli_ori)  # Facet by poli_ori (Liberal vs Conservative)
+
+# Print the plot
+print(fam_tw_ps)</code></pre>
+<p><img src="p06_files/figure-html/fig9_fam_polixsociet-1.png" width="672" /></p>
+<pre class="r"><code># Save the plot</code></pre>
+<pre class="r"><code>fam_tw_hs &lt;- tribble(
+ ~Happiness, ~society_type, ~emmean, ~SE,
+  &quot;Low&quot;, &quot;Nontraditional&quot;, 3.10, 0.10, 
+  &quot;High&quot;, &quot;Nontraditional&quot;, 7.9, 0.10,
+  &quot;Low&quot;, &quot;Traditional&quot;, 3.81, 0.11,
+  &quot;High&quot;, &quot;Traditional&quot;, 8.74, 0.087
+)
+fam_tw_hs$Happiness &lt;- factor(fam_tw_hs$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##fig10_famHxS</p>
+<pre class="r"><code>fam_tw_hs_plot &lt;- ggplot(fam_tw_hs, aes(x = Happiness, y = emmean, fill = Happiness)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Low&quot; = &quot;gray50&quot;, &quot;High&quot; = &quot;gray80&quot;)) +  # Custom fill
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Happiness&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;
+  ) +
+  facet_wrap(~society_type)  # ✅ Facet by society_type
+
+# Print the plot
+print(fam_tw_hs_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig10_fam_hapxsociety-1.png" width="672" /></p>
+<p>##christianity</p>
+<pre class="r"><code>christ_tw_ph &lt;- tribble(
+ ~political_orientation, ~Happiness, ~emmean, ~SE,
+  &quot;Liberal&quot;, &quot;Low&quot;, 2.82, 0.12, 
+  &quot;Conservative&quot;, &quot;Low&quot;, 3.66, 0.12,
+  &quot;Liberal&quot;, &quot;High&quot;, 8.54, 0.10,
+  &quot;Conservative&quot;, &quot;High&quot;, 8.29, 0.10
+)
+
+christ_tw_ph$Happiness &lt;- factor(christ_tw_ph$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##fig14_ch_PxH</p>
+<pre class="r"><code>christ_tw_ph_plot &lt;- ggplot(christ_tw_ph, aes(x = Happiness, y = emmean, fill = Happiness)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Low&quot; = &quot;gray50&quot;, &quot;High&quot; = &quot;gray80&quot;)) +  # Custom fill
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Happiness&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;
+  ) +
+  facet_wrap(~political_orientation)
+print(christ_tw_ph_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig14_christian_tw_poli_happiness-1.png" width="672" /></p>
+<pre class="r"><code>christ_tw_ps &lt;- tribble(
+ ~political_orientation, ~society_type, ~emmean, ~SE,
+  &quot;Liberal&quot;, &quot;Unimportant&quot;, 6.5, 0.12, 
+  &quot;Conservative&quot;, &quot;Unimportant&quot;, 4.91, 0.11,
+  &quot;Liberal&quot;, &quot;Important&quot;, 4.86, 0.11,
+  &quot;Conservative&quot;, &quot;Important&quot;, 7.05, 0.11)</code></pre>
+<p>##fig15_ch_PxS</p>
+<pre class="r"><code>christ_tw_ps_plot &lt;- ggplot(christ_tw_ps, aes(x = society_type, y = emmean, fill = society_type)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Unimportant&quot; = &quot;gray50&quot;, &quot;Important&quot; = &quot;gray80&quot;)) +  # Custom fill
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Christianity&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Christianity&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;
+  )    +
+      facet_wrap(~political_orientation)
+    print(christ_tw_ps_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig15_christian_politicalorientation_societytype-1.png" width="672" /></p>
+<pre class="r"><code>christ_tw_hs &lt;- tribble(
+ ~Happiness, ~society_type, ~emmean, ~SE,
+  &quot;Low&quot;, &quot;Unimportant&quot;, 3.01, 0.10, 
+  &quot;High&quot;, &quot;Unimportant&quot;, 8.39, 0.11,
+  &quot;Low&quot;, &quot;Important&quot;, 3.46, 0.10,
+  &quot;High&quot;, &quot;Important&quot;, 8.44, 0.10)
+christ_tw_hs$Happiness &lt;- factor(christ_tw_hs$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##fig16_ch_HxS</p>
+<pre class="r"><code>christ_tw_hs_plot &lt;- ggplot(christ_tw_hs, aes(x = Happiness, y = emmean, fill = Happiness)) +
+  geom_bar(stat = &quot;identity&quot;, position = &quot;dodge&quot;) +
+  geom_errorbar(aes(ymin = emmean - SE, ymax = emmean + SE), 
+                width = 0.2, position = position_dodge(width = 0.9)) +
+  scale_fill_manual(values = c(&quot;Low&quot; = &quot;gray50&quot;, &quot;High&quot; = &quot;gray80&quot;)) +  # Custom fill
+  scale_y_continuous(breaks = seq(1, 11, by = 1)) +
+  coord_cartesian(ylim = c(1, 11)) +
+  labs(
+    title = NULL,
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    fill = &quot;Happiness&quot;
+  ) +
+  theme_classic() +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;none&quot;
+  ) +
+  facet_wrap(~society_type)
+print(christ_tw_hs_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig16_christian_tw_happiness_societytype-1.png" width="672" /></p>
+<p>#three-way</p>
+<pre class="r"><code>famval_3w_df &lt;- tribble(
+  ~poli_ori,      ~society_type, ~Happiness,         ~mean,       ~se,
+  &quot;Conservative&quot;, &quot;Nontraditional&quot;,          &quot;Low&quot;,     2.627706,    0.14978388,
+  &quot;Conservative&quot;, &quot;Nontraditional&quot;,          &quot;High&quot;,    6.341991,    0.17792659,
+  &quot;Conservative&quot;, &quot;Traditional&quot;,          &quot;Low&quot;,     4.904762,    0.18200138,
+  &quot;Conservative&quot;, &quot;Traditional&quot;,          &quot;High&quot;,    9.835498,    0.09402925,
+  &quot;Liberal&quot;,      &quot;Nontraditional&quot;,          &quot;Low&quot;,     3.570370,    0.13674704,
+  &quot;Liberal&quot;,      &quot;Nontraditional&quot;,          &quot;High&quot;,    9.462963,    0.10169496,
+  &quot;Liberal&quot;,      &quot;Traditional&quot;,          &quot;Low&quot;,     2.714815,    0.12955408,
+  &quot;Liberal&quot;,      &quot;Traditional&quot;,          &quot;High&quot;,    7.644444,    0.13962178
+)
+
+# Optional: reorder Happiness levels for plotting
+famval_3w_df$Happiness &lt;- factor(famval_3w_df$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>###fig11_fam_3</p>
+<pre class="r"><code>fam_3_way &lt;- ggplot(famval_3w_df, aes(x = Happiness, y = mean, color = society_type, group = interaction(society_type, poli_ori)))+
+  geom_point(size = 3) +
+  geom_line(size = .75) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), 
+                width = 0.2) +
+  scale_y_continuous(breaks = 1:11, limits = c(1, 11)) +
+  scale_color_manual(values = c(&quot;Nontraditional&quot; = &quot;gray50&quot;, &quot;Traditional&quot; = &quot;gray80&quot;))+
+  theme_classic() +
+  labs(
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    color = &quot;Society Type: Family Values&quot;
+  ) +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;bottom&quot;
+  ) +
+  facet_wrap(~poli_ori)</code></pre>
+<pre><code>## Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+## ℹ Please use `linewidth` instead.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_lifecycle_warnings()` to see where this warning was
+## generated.</code></pre>
+<pre class="r"><code># Print the plot
+print(fam_3_way)</code></pre>
+<p><img src="p06_files/figure-html/fig11_familyvalue_threeway-1.png" width="672" /></p>
+<pre class="r"><code># Save the plot
+
+
+
+# Save the plot</code></pre>
+<pre class="r"><code>christ_3w_df &lt;- tribble(
+  ~poli_ori,      ~society_type, ~Happiness,         ~mean,       ~se,
+  &quot;Conservative&quot;, &quot;Unimportant&quot;,          &quot;Low&quot;,     2.816479,    0.13939406,
+  &quot;Conservative&quot;, &quot;Unimportant&quot;,          &quot;High&quot;,    6.996255,    0.18727943,
+  &quot;Conservative&quot;, &quot;Important&quot;,          &quot;Low&quot;,     4.501873,    0.16487943,
+  &quot;Conservative&quot;, &quot;Important&quot;,          &quot;High&quot;,    9.591760,    0.10800660,
+  &quot;Liberal&quot;,      &quot;Unimportant&quot;,          &quot;Low&quot;,     3.208696,    0.14105724,
+  &quot;Liberal&quot;,      &quot;Unimportant&quot;,          &quot;High&quot;,    9.786957,    0.09826295,
+  &quot;Liberal&quot;,      &quot;Important&quot;,          &quot;Low&quot;,     2.426087,    0.11263820,
+  &quot;Liberal&quot;,      &quot;Important&quot;,          &quot;High&quot;,    7.286957,    0.18399305
+)
+
+# Optional: reorder Happiness levels for plotting
+christ_3w_df$Happiness &lt;- factor(christ_3w_df$Happiness, levels = c(&quot;Low&quot;, &quot;High&quot;))</code></pre>
+<p>##fig17_ch_3</p>
+<pre class="r"><code>christ_3w_plot &lt;- ggplot(christ_3w_df, 
+                         aes(x = Happiness, y = mean, color = society_type, group = interaction(society_type, poli_ori))) +
+  geom_point(size = 3) +
+  geom_line(size = .75) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.2) +
+  facet_wrap(~poli_ori) +
+  scale_y_continuous(breaks = 1:11, limits = c(1, 11)) +
+  scale_color_manual(values = c(&quot;Unimportant&quot; = &quot;gray50&quot;, &quot;Important&quot; = &quot;gray80&quot;)) +
+  theme_classic() +
+  labs(
+    x = &quot;Happiness&quot;,
+    y = &quot;Mean Ideal Society Rating&quot;,
+    color = &quot;Society Type: Importance of Christianity&quot;
+  ) +
+  theme(
+    text = element_text(family = &quot;Times New Roman&quot;, size = 10),
+    axis.text.x = element_text(size = 10),
+    axis.title.x = element_text(size = 12, margin = margin(t = 15)),
+    axis.title.y = element_text(size = 12, margin = margin(r = 10)),
+    legend.position = &quot;bottom&quot;
+  )
+
+# Print the plot
+print(christ_3w_plot)</code></pre>
+<p><img src="p06_files/figure-html/fig17_christian_threeway-1.png" width="672" /></p>
 
 
 
