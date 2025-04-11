@@ -2,4 +2,42 @@
 title: "Portfolio 7"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+#libraries
+
+```{r libraries}
+library(tidytuesdayR)
+library(tidyverse)
+library(ggplot2)
+```
+
+
+#RollingStone Data
+For this portfolio, i am exploring the tidytuesday data on Rolling Stone Album Rankings.
+
+*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity*
+
+```{r getdata}
+rolling_stone <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-05-07/rolling_stone.csv')
+
+```
+
+#Link to var info
+https://github.com/rfordatascience/tidytuesday/blob/main/data/2024/2024-05-07/readme.md
+
+# Exploration of data
+
+## plotting by year
+
+```{r year}
+rolling_stone %>%
+  ggplot(aes(x = release_year)) +
+  geom_histogram() +
+  scale_x_continuous(breaks = seq(1950, 2020, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 100, by = 10)) +
+  labs(title = "Rolling Stone Album Rankings for 2024",
+       x = "Release Year",
+       y = "Frequency") +
+  theme_classic()
+```
+
+
