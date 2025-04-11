@@ -2,4 +2,84 @@
 title: "Portfolio 8"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+This portfolio is testing certain hypothesis that results from my exploration of the tidytuesday data from Rolling Stone's album rankins
+
+
+#libraries
+
+```{r libraries}
+library(tidytuesdayR)
+library(tidyverse)
+library(ggplot2)
+library(forcats)
+```
+
+#data
+##rolling_stone
+```{r getdata}
+rolling_stone <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2024/2024-05-07/rolling_stone.csv')
+
+```
+
+##rolling_stone_long
+
+```{r long}
+rolling_stone_long <- rolling_stone %>%
+  pivot_longer(
+    cols = starts_with("rank_"),
+    names_to = "rs_year",
+    names_prefix = "rank_",
+    values_to = "rank"
+  ) %>%
+  filter(!is.na(rank)) %>%  
+    mutate(rs_year = as.integer(rs_year))
+```
+
+#hypothesis
+
+My general hypothesis is that music tastes have changed more between 2012 and 2020 compared to how much it changed between 2003 and 2012--likely driven by the rise of streaming services like Spotify.
+
+First, older albums tend to decrease in rankings overtime, 
+*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity. Hypothesis: there are more changes (i.e, genre, release year, ranking shift, etc.) between 2012 and 2020 compared to 2003 and 2012 and these shifts are driven by the medium that people are using to listen to music*
+
+
+#H1:NewerMusic
+I am predicting that "newer" music is getting less popular in the rankings. Specifically, it looks like in 2020 the album rankings had far greater variability compared to 2003 and 2012 so that people were liking albums that spanned a more years than before. Of course, part of this is because they have more music available (~10 or ~20 years worth compared to previous rankings) but it also seems to be more than just that. 
+
+To test this I will create a new variable in the long-data set that subtracts the release year from the rs_year (so if its a 2003 ranking and released in 1973 the score will be 30). Using three lms, I will get point estimates for how well that predicts rankings in 2003, 2012, and 2020. After that I will compare how well they predict the rankings.
+
+My guess is that there will be more similarity between 2003 and 2012 than 2012 and 2020 with how well that new variable predicts the ranking.
+
+```{r mutate}
+rolling_stone_long <- rolling_stone_long %>%
+  mutate(age_of_album = rs_year - release_year)
+```
+##LinearModel
+```{r linearmodel_ageofalbum}
+lm_2003 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2003))
+lm_2012 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2012))
+lm_2020 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2020))
+
+summary(lm_2003)
+summary(lm_2012)
+summary(lm_2020)
+```
+
+```{r interaction}
+lm_combined <- lm(rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
+summary(lm_combined)
+```
+
+```{r plot}
+ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
+  geom_point(alpha = 0.4, color = "gray30") +  # semi-transparent points
+  geom_smooth(method = "lm", color = "firebrick", se = TRUE) +  # linear trend line
+  facet_wrap(~ rs_year) +
+  scale_y_reverse() +  # lower rank numbers are better (1 = best)
+  theme_minimal()+
+  labs(
+    title = "Album Rank by Age Across Rolling Stone Rankings",
+    x = "Age of Album at Time of Ranking",
+    y = "Rank (Lower is Better)"
+  )
+```
