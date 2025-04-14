@@ -12,6 +12,7 @@ library(tidytuesdayR)
 library(tidyverse)
 library(ggplot2)
 library(forcats)
+library(lme4)
 ```
 
 #data
@@ -32,7 +33,7 @@ rolling_stone_long <- rolling_stone %>%
     values_to = "rank"
   ) %>%
   filter(!is.na(rank)) %>%  
-    mutate(rs_year = as.integer(rs_year))
+    mutate(rs_year = as.factor(rs_year))
 ```
 
 #hypothesis
@@ -40,40 +41,47 @@ rolling_stone_long <- rolling_stone %>%
 My general hypothesis is that music tastes have changed more between 2012 and 2020 compared to how much it changed between 2003 and 2012--likely driven by the rise of streaming services like Spotify.
 
 First, older albums tend to decrease in rankings overtime, 
-*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity. Hypothesis: there are more changes (i.e, genre, release year, ranking shift, etc.) between 2012 and 2020 compared to 2003 and 2012 and these shifts are driven by the medium that people are using to listen to music*
+*Might analyze something about how from 2003, 2012, and then 2020 there are shifts in which albums are included??? possible changes in release_year or genre or spotify popularity. Hypothesis: there are more changes (i.e, genre, release year, ranking shift, etc.) between 2012 and 2020 compared to 2003 and 2012 and these shifts are driven by the medium that people are using to listen to music and maybe the age of the people doign the ranking*
 
 
 #H1:NewerMusic
 I am predicting that "newer" music is getting less popular in the rankings. Specifically, it looks like in 2020 the album rankings had far greater variability compared to 2003 and 2012 so that people were liking albums that spanned a more years than before. Of course, part of this is because they have more music available (~10 or ~20 years worth compared to previous rankings) but it also seems to be more than just that. 
 
 To test this I will create a new variable in the long-data set that subtracts the release year from the rs_year (so if its a 2003 ranking and released in 1973 the score will be 30). Using three lms, I will get point estimates for how well that predicts rankings in 2003, 2012, and 2020. After that I will compare how well they predict the rankings.
+Also i will create a new variable that is based on whether the album was released in the last 10 years (from the rank year).
 
 My guess is that there will be more similarity between 2003 and 2012 than 2012 and 2020 with how well that new variable predicts the ranking.
 
 ```{r mutate}
 rolling_stone_long <- rolling_stone_long %>%
-  mutate(age_of_album = rs_year - release_year)
+  mutate(
+    rs_year = as.numeric(as.character(rs_year)),  # convert from factor to numeric
+    age_of_album = rs_year - release_year
+  ) %>%
+  mutate(release_decade = paste0(floor(release_year / 10) * 10, "s"))
 ```
-##LinearModel
-```{r linearmodel_ageofalbum}
-lm_2003 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2003))
-lm_2012 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2012))
-lm_2020 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2020))
+##LinearModel:Rank
 
-summary(lm_2003)
-summary(lm_2012)
-summary(lm_2020)
+*the following models show that age_of_album has less predictive power for the 2020 data compared to 2003 and 2012*
+```{r linearmodel_ageofalbum}
+lm_rank2003 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2003))
+lm_rank2012 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2012))
+lm_rank2020 <- lm(rank ~ age_of_album, data = rolling_stone_long %>% filter(rs_year == 2020))
+
+summary(lm_rank2003)
+summary(lm_rank2012)
+summary(lm_rank2020)
 ```
 
 ```{r interaction}
-lm_combined <- lm(rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
-summary(lm_combined)
+lm_rankcombined <- lm(rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
+summary(lm_rankcombined)
 ```
 
 ```{r plot}
 ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
   geom_point(alpha = 0.4, color = "gray30") +  # semi-transparent points
-  geom_smooth(method = "lm", color = "black", se = TRUE) +  # linear trend line
+  geom_smooth(method = "lm", color = "blue", se = TRUE) +  # linear trend line
   facet_wrap(~ rs_year) +
   scale_x_reverse() + # lower rank numbers are better (1 = best)
   theme_classic()+
@@ -83,3 +91,43 @@ ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
     y = "Rank (Lower is Better)"
   )
 ```
+
+##DecadesBarPlot
+```{r decades_bar_plot}
+rolling_stone_long %>%
+  ggplot(aes(x = release_year, fill = factor(rs_year))) +
+  geom_density(alpha = 0.4) +
+  theme_classic() +
+  labs(
+    title = "Density of Release Years by Ranking Year",
+    x = "Release Year",
+    fill = "Ranking Year"
+  )
+```
+##KS_testReleaseYear
+```{r KS_test_release_year}
+group_2003 <- rolling_stone_long %>% filter(rs_year == 2003) %>% pull(release_year)
+group_2012 <- rolling_stone_long %>% filter(rs_year == 2012) %>% pull(release_year)
+group_2020 <- rolling_stone_long %>% filter(rs_year == 2020) %>% pull(release_year)
+
+# Run pairwise KS tests
+ks.test(group_2003, group_2012)
+ks.test(group_2003, group_2020)
+ks.test(group_2012, group_2020)
+```
+
+##multilevelmodeling
+```{r multilevelmodeling}
+library(lme4)
+
+# Fit a mixed-effects model with random intercepts for rs_year
+model <- lmer(rank ~ release_year + rs_year + (1 | rs_year), data = rolling_stone_long)
+# Summarize the model results
+summary(model)
+ranef(model)
+
+library(emmeans)
+release_date_emmeans <- emmeans(model, pairwise ~ rs_year)
+print(release_date_emmeans)
+```
+***restrict to common range***
