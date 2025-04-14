@@ -73,10 +73,10 @@ summary(lm_combined)
 ```{r plot}
 ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
   geom_point(alpha = 0.4, color = "gray30") +  # semi-transparent points
-  geom_smooth(method = "lm", color = "firebrick", se = TRUE) +  # linear trend line
+  geom_smooth(method = "lm", color = "black", se = TRUE) +  # linear trend line
   facet_wrap(~ rs_year) +
-  scale_y_reverse() +  # lower rank numbers are better (1 = best)
-  theme_minimal()+
+  scale_x_reverse() + # lower rank numbers are better (1 = best)
+  theme_classic()+
   labs(
     title = "Album Rank by Age Across Rolling Stone Rankings",
     x = "Age of Album at Time of Ranking",
