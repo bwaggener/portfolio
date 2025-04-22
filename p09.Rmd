@@ -2,4 +2,100 @@
 title: "Portfolio 9"
 ---
 
-> The projects should be numbered consecutively (i.e., in the order in which you began them), and should include for each project a description of the goal, the product (computer program, hand graph, computer graph, etc.), the data, and some interpretation. Reports must be reproducible and of high quality in terms of writing, grammar, presentation, etc.
+This portfolio project is on the TidyTuesday dataset from august 25th 2020 on the Chopped tv show.
+
+#libraries
+```{r libraries}
+library(tidyverse)
+library(tidytuesdayR)
+library(ggplot2)
+library(lme4)
+```
+
+#data
+```{r getchoppeddata}
+chopped <- readr::read_tsv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-08-25/chopped.tsv')
+
+```
+
+#long
+```{r judgetolong}
+chopped_long <- chopped %>%
+  pivot_longer(
+    cols = starts_with("judge"),
+    names_to = "judge_position",
+    values_to = "judge"
+  ) %>%
+  mutate(judge = as.factor(judge))
+```
+#avrg_judge
+```{r averageratingbyjudge}
+avg_rating_judge_all <- chopped_long %>%
+  filter(!is.na(judge)) %>%
+  group_by(judge) %>%
+  summarize(
+    avg_rating = mean(episode_rating, na.rm = TRUE),
+    n_episodes = n()
+  ) %>%
+  arrange(desc(avg_rating))
+
+avg_rating_judge_filtered <- avg_rating_judge %>%
+  filter(n_episodes >= 3)
+```
+
+
+#exploratory 
+##season*rating
+```{r scatterplot_season*rating}
+chopped %>%
+  ggplot(aes(x = season, y = episode_rating)) +
+  geom_jitter() +
+  geom_smooth(method = "lm") +
+  labs(title = "Scatterplot of Season vs. Rating",
+       x = "Season",
+       y = "Rating") +
+  theme_minimal()
+```
+
+Make a new df with judge as variable and then average episode rating for episodes with that judge (limit to only top ten most frequent judges)
+
+#exploring judge_combos
+```{r judgcombodata}
+chopped_with_combo <- chopped %>%
+  mutate(
+    judge_combo = paste(judge1, judge2, judge3, sep = " + ")
+  )
+
+combo_ratings <- chopped_with_combo %>%
+  group_by(judge_combo) %>%
+  summarize(
+    avg_rating = mean(episode_rating, na.rm = TRUE),
+    n_episodes = n()
+  ) %>%
+  arrange(desc(avg_rating))
+
+combo_ratings$judge_combo <- as.factor(combo_ratings$judge_combo)
+```
+
+#tryingagain
+```{r longer}
+judge_counts <- chopped_long %>%
+  group_by(judge) %>%
+  summarise(episode_count = n())  # Count episodes per judge
+
+# Filter out judges who were in fewer than 3 episodes
+chopped_long_filtered <- chopped_long %>%
+  filter(judge %in% judge_counts$judge[judge_counts$episode_count >= 5])
+
+# Preview the filtered data
+head(chopped_long_filtered)
+```
+
+#
+
+```{r model}
+model <- lmer(episode_rating ~ judge + (1 | season_episode), data = chopped_long_filtered)
+
+# Summary of the model
+summary(model)
+```
