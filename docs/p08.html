@@ -356,7 +356,8 @@ shifts in which albums are included??? possible changes in release_year
 or genre or spotify popularity. Hypothesis: there are more changes (i.e,
 genre, release year, ranking shift, etc.) between 2012 and 2020 compared
 to 2003 and 2012 and these shifts are driven by the medium that people
-are using to listen to music</em></p>
+are using to listen to music and maybe the age of the people doign the
+ranking</em></p>
 <p>#H1:NewerMusic I am predicting that “newer” music is getting less
 popular in the rankings. Specifically, it looks like in 2020 the album
 rankings had far greater variability compared to 2003 and 2012 so that
@@ -368,9 +369,7 @@ more than just that.</p>
 subtracts the release year from the rs_year (so if its a 2003 ranking
 and released in 1973 the score will be 30). Using three lms, I will get
 point estimates for how well that predicts rankings in 2003, 2012, and
-2020. After that I will compare how well they predict the rankings. Also
-i will create a new variable that is based on whether the album was
-released in the last 10 years (from the rank year).</p>
+2020. After that I will compare how well they predict the rankings.</p>
 <p>My guess is that there will be more similarity between 2003 and 2012
 than 2012 and 2020 with how well that new variable predicts the
 ranking.</p>
@@ -381,6 +380,8 @@ ranking.</p>
   ) %&gt;%
   mutate(release_decade = paste0(floor(release_year / 10) * 10, &quot;s&quot;))</code></pre>
 <p>##LinearModel:Rank</p>
+<p><em>the following models show that age_of_album has less predictive
+power for the 2020 data compared to 2003 and 2012</em></p>
 <pre class="r"><code>lm_rank2003 &lt;- lm(rank ~ age_of_album, data = rolling_stone_long %&gt;% filter(rs_year == 2003))
 lm_rank2012 &lt;- lm(rank ~ age_of_album, data = rolling_stone_long %&gt;% filter(rs_year == 2012))
 lm_rank2020 &lt;- lm(rank ~ age_of_album, data = rolling_stone_long %&gt;% filter(rs_year == 2020))
@@ -445,33 +446,13 @@ summary(lm_rank2003)</code></pre>
 ## Residual standard error: 143.4 on 498 degrees of freedom
 ## Multiple R-squared:  0.01687,    Adjusted R-squared:  0.01489 
 ## F-statistic: 8.544 on 1 and 498 DF,  p-value: 0.003625</code></pre>
-<pre class="r"><code>lm_rankcombined &lt;- lm(rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
-summary(lm_rankcombined)</code></pre>
-<pre><code>## 
-## Call:
-## lm(formula = rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -305.586 -114.909   -4.025  111.669  293.771 
-## 
-## Coefficients:
-##                                  Estimate Std. Error t value Pr(&gt;|t|)    
-## (Intercept)                      351.7244    15.2254  23.101  &lt; 2e-16 ***
-## age_of_album                      -4.0693     0.5586  -7.285 5.20e-13 ***
-## factor(rs_year)2012               26.0909    23.5261   1.109   0.2676    
-## factor(rs_year)2020              -56.5345    22.1523  -2.552   0.0108 *  
-## age_of_album:factor(rs_year)2012   0.1854     0.7585   0.244   0.8069    
-## age_of_album:factor(rs_year)2020   2.8165     0.6965   4.044 5.53e-05 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## Residual standard error: 139.2 on 1494 degrees of freedom
-## Multiple R-squared:  0.07402,    Adjusted R-squared:  0.07092 
-## F-statistic: 23.89 on 5 and 1494 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Looking at the R^2 value it goes from 9-10% of the variance in
+rankings being predicted by how old the album is at the time of ranking
+at 2003 and 2012 to 1.7% in 2020. This is supportive of my
+hypothesis.</p>
 <pre class="r"><code>ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
   geom_point(alpha = 0.4, color = &quot;gray30&quot;) +  # semi-transparent points
-  geom_smooth(method = &quot;lm&quot;, color = &quot;black&quot;, se = TRUE) +  # linear trend line
+  geom_smooth(method = &quot;lm&quot;, color = &quot;blue&quot;, se = TRUE) +  # linear trend line
   facet_wrap(~ rs_year) +
   scale_x_reverse() + # lower rank numbers are better (1 = best)
   theme_classic()+
@@ -526,69 +507,18 @@ ks.test(group_2003, group_2012)</code></pre>
 ## data:  group_2012 and group_2020
 ## D = 0.156, p-value = 1.039e-05
 ## alternative hypothesis: two-sided</code></pre>
-<p>##multilevelmodeling</p>
-<pre class="r"><code>library(lme4)
-
-# Fit a mixed-effects model with random intercepts for rs_year
-model &lt;- lmer(rank ~ release_year + rs_year + (1 | rs_year), data = rolling_stone_long)</code></pre>
-<pre><code>## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
-<pre class="r"><code># Summarize the model results
-summary(model)</code></pre>
-<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
-## Formula: rank ~ release_year + rs_year + (1 | rs_year)
-##    Data: rolling_stone_long
-## 
-## REML criterion at convergence: 19077.6
-## 
-## Scaled residuals: 
-##      Min       1Q   Median       3Q      Max 
-## -2.26281 -0.82261 -0.01061  0.83682  2.11751 
-## 
-## Random effects:
-##  Groups   Name        Variance  Std.Dev. 
-##  rs_year  (Intercept) 5.044e-13 7.102e-07
-##  Residual             1.964e+04 1.401e+02
-## Number of obs: 1500, groups:  rs_year, 3
-## 
-## Fixed effects:
-##                Estimate Std. Error t value
-## (Intercept)  -3170.9860  1106.0442  -2.867
-## release_year     2.7233     0.2808   9.699
-## rs_year         -0.9803     0.5308  -1.847
-## 
-## Correlation of Fixed Effects:
-##             (Intr) rls_yr
-## release_yer -0.319       
-## rs_year     -0.870 -0.190
-## optimizer (nloptwrap) convergence code: 0 (OK)
-## boundary (singular) fit: see help(&#39;isSingular&#39;)</code></pre>
-<pre class="r"><code>ranef(model)</code></pre>
-<pre><code>## $rs_year
-##        (Intercept)
-## 2003 -2.399300e-14
-## 2012  5.098512e-14
-## 2020 -2.699212e-14
-## 
-## with conditional variances for &quot;rs_year&quot;</code></pre>
-<pre class="r"><code>library(emmeans)</code></pre>
-<pre><code>## Warning: package &#39;emmeans&#39; was built under R version 4.4.3</code></pre>
-<pre><code>## Welcome to emmeans.
-## Caution: You lose important information if you filter this package&#39;s results.
-## See &#39;? untidy&#39;</code></pre>
-<pre class="r"><code>release_date_emmeans &lt;- emmeans(model, pairwise ~ rs_year)
-print(release_date_emmeans)</code></pre>
-<pre><code>## $emmeans
-##  rs_year emmean   SE   df lower.CL upper.CL
-##     2012    251 3.62 0.99      203      298
-## 
-## Degrees-of-freedom method: kenward-roger 
-## Confidence level used: 0.95 
-## 
-## $contrasts
-##  contrast  estimate SE df z.ratio p.value
-##  (nothing)   nonEst NA NA      NA      NA
-## 
-## Degrees-of-freedom method: kenward-roger</code></pre>
+<p>The K-S test checks for differences in the distributions of release
+years between the three ranking years. The p-values indicate that the
+difference between distributions is not statistically different between
+2003 and 2012 while it is different between 2003 and 2020 and also 2012
+and 2020.</p>
+<p>This is consistent with my hypothesis that the rankings in 2020 are
+more variable and span a wider range of years than the previous
+rankings. Also this demonstrates that it is not just because there are
+more years of music (2020 has 8 or 17 more years than 2012 and 2003) but
+that the distribution of rankings are actually more different in 2020.
+This may be the result of the use of spotify compared to previous
+methods of listening to music (radio, iTunes, CDs).</p>
 
 
 

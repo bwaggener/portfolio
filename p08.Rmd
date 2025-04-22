@@ -48,7 +48,7 @@ First, older albums tend to decrease in rankings overtime,
 I am predicting that "newer" music is getting less popular in the rankings. Specifically, it looks like in 2020 the album rankings had far greater variability compared to 2003 and 2012 so that people were liking albums that spanned a more years than before. Of course, part of this is because they have more music available (~10 or ~20 years worth compared to previous rankings) but it also seems to be more than just that. 
 
 To test this I will create a new variable in the long-data set that subtracts the release year from the rs_year (so if its a 2003 ranking and released in 1973 the score will be 30). Using three lms, I will get point estimates for how well that predicts rankings in 2003, 2012, and 2020. After that I will compare how well they predict the rankings.
-Also i will create a new variable that is based on whether the album was released in the last 10 years (from the rank year).
+
 
 My guess is that there will be more similarity between 2003 and 2012 than 2012 and 2020 with how well that new variable predicts the ranking.
 
@@ -73,10 +73,8 @@ summary(lm_rank2012)
 summary(lm_rank2020)
 ```
 
-```{r interaction}
-lm_rankcombined <- lm(rank ~ age_of_album * factor(rs_year), data = rolling_stone_long)
-summary(lm_rankcombined)
-```
+Looking at the R^2 value it goes from 9-10% of the variance in rankings being predicted by how old the album is at the time of ranking at 2003 and 2012 to 1.7% in 2020. This is supportive of my hypothesis.
+
 
 ```{r plot}
 ggplot(rolling_stone_long, aes(x = age_of_album, y = rank)) +
@@ -115,19 +113,6 @@ ks.test(group_2003, group_2012)
 ks.test(group_2003, group_2020)
 ks.test(group_2012, group_2020)
 ```
+The K-S test checks for differences in the distributions of release years between the three ranking years. The p-values indicate that the difference between distributions is not statistically different between 2003 and 2012 while it is different between 2003 and 2020 and also 2012 and 2020.
 
-##multilevelmodeling
-```{r multilevelmodeling}
-library(lme4)
-
-# Fit a mixed-effects model with random intercepts for rs_year
-model <- lmer(rank ~ release_year + rs_year + (1 | rs_year), data = rolling_stone_long)
-# Summarize the model results
-summary(model)
-ranef(model)
-
-library(emmeans)
-release_date_emmeans <- emmeans(model, pairwise ~ rs_year)
-print(release_date_emmeans)
-```
-***restrict to common range***
+This is consistent with my hypothesis that the rankings in 2020 are more variable and span a wider range of years than the previous rankings. Also this demonstrates that it is not just because there are more years of music (2020 has 8 or 17 more years than 2012 and 2003) but that the distribution of rankings are actually more different in 2020. This may be the result of the use of spotify compared to previous methods of listening to music (radio, iTunes, CDs).
