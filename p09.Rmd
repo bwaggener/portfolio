@@ -28,20 +28,7 @@ chopped_long <- chopped %>%
   ) %>%
   mutate(judge = as.factor(judge))
 ```
-#avrg_judge
-```{r averageratingbyjudge}
-avg_rating_judge_all <- chopped_long %>%
-  filter(!is.na(judge)) %>%
-  group_by(judge) %>%
-  summarize(
-    avg_rating = mean(episode_rating, na.rm = TRUE),
-    n_episodes = n()
-  ) %>%
-  arrange(desc(avg_rating))
 
-avg_rating_judge_filtered <- avg_rating_judge %>%
-  filter(n_episodes >= 3)
-```
 
 
 #exploratory 
@@ -57,14 +44,15 @@ chopped %>%
   theme_minimal()
 ```
 
-Make a new df with judge as variable and then average episode rating for episodes with that judge (limit to only top ten most frequent judges)
 
 #exploring judge_combos
 ```{r judgcombodata}
 chopped_with_combo <- chopped %>%
+  rowwise() %>%
   mutate(
-    judge_combo = paste(judge1, judge2, judge3, sep = " + ")
-  )
+    judge_combo = paste(sort(c(judge1, judge2, judge3)), collapse = " + ")
+  ) %>%
+  ungroup()
 
 combo_ratings <- chopped_with_combo %>%
   group_by(judge_combo) %>%
@@ -72,9 +60,13 @@ combo_ratings <- chopped_with_combo %>%
     avg_rating = mean(episode_rating, na.rm = TRUE),
     n_episodes = n()
   ) %>%
-  arrange(desc(avg_rating))
+  filter(n_episodes >= 2) %>%
+  arrange(desc(avg_rating)) 
+   
+
 
 combo_ratings$judge_combo <- as.factor(combo_ratings$judge_combo)
+
 ```
 
 #tryingagain
@@ -97,5 +89,34 @@ head(chopped_long_filtered)
 model <- lmer(episode_rating ~ judge + (1 | season_episode), data = chopped_long_filtered)
 
 # Summary of the model
+summary(model)
+```
+
+
+###fixthis
+
+```{r meow}
+judges_long <- chopped %>%
+  pivot_longer(
+    cols = c(judge1, judge2, judge3),
+    names_to = "judge_position",
+    values_to = "judge"
+  ) %>%
+  distinct(series_episode, judge, episode_rating)  # optional, in case of duplicates
+
+# Step 2: Convert to wide format with one-hot encoding for each judge
+judges_wide <- judges_long %>%
+  mutate(present = 1) %>%
+  pivot_wider(
+    names_from = judge,
+    values_from = present,
+    values_fill = list(present = 0)
+  )
+
+# Step 3: Run a linear regression to see which judges predict higher ratings
+model <- lm(episode_rating ~ ., data = judges_wide %>% 
+              select(-series_episode))
+
+# Step 4: View results
 summary(model)
 ```
