@@ -32,12 +32,12 @@ chopped_long <- chopped %>%
 
 
 #exploratory 
-##season*rating
-```{r scatterplot_season*rating}
+##seasonrating
+```{r scatterplot_seasonrating}
 chopped %>%
   ggplot(aes(x = season, y = episode_rating)) +
-  geom_jitter() +
-  geom_smooth(method = "lm") +
+  geom_jitter(na.rm = TRUE) +
+  geom_smooth(method = "lm", na.rm = TRUE) +
   labs(title = "Scatterplot of Season vs. Rating",
        x = "Season",
        y = "Rating") +
@@ -77,7 +77,7 @@ judge_counts <- chopped_long %>%
 
 # Filter out judges who were in fewer than 3 episodes
 chopped_long_filtered <- chopped_long %>%
-  filter(judge %in% judge_counts$judge[judge_counts$episode_count >= 5])
+  filter(judge %in% judge_counts$judge[judge_counts$episode_count >= 4])
 
 # Preview the filtered data
 head(chopped_long_filtered)
@@ -92,31 +92,68 @@ model <- lmer(episode_rating ~ judge + (1 | season_episode), data = chopped_long
 summary(model)
 ```
 
+```{r average_rating}
+# Calculate average rating for all episodes
+x <- chopped_long_filtered$episode_rating
+x <- x[!is.na(x)]  # remove NAs
 
-###fixthis
+n <- length(x)
+mean_x <- mean(x)
+sd_x <- sd(x)
+se_x <- sd_x / sqrt(n)
+ci <- qt(0.975, df = n - 1) * se_x  # 95% CI
 
-```{r meow}
-judges_long <- chopped %>%
-  pivot_longer(
-    cols = c(judge1, judge2, judge3),
-    names_to = "judge_position",
-    values_to = "judge"
-  ) %>%
-  distinct(series_episode, judge, episode_rating)  # optional, in case of duplicates
+# CI bounds
+lower_ci <- mean_x - ci
+upper_ci <- mean_x + ci
 
-# Step 2: Convert to wide format with one-hot encoding for each judge
-judges_wide <- judges_long %>%
-  mutate(present = 1) %>%
-  pivot_wider(
-    names_from = judge,
-    values_from = present,
-    values_fill = list(present = 0)
-  )
+# Print results
+mean_x
+lower_ci
+upper_ci
 
-# Step 3: Run a linear regression to see which judges predict higher ratings
-model <- lm(episode_rating ~ ., data = judges_wide %>% 
-              select(-series_episode))
+average_ratings <- data.frame(
+  mean_x = mean_x,
+  lower_ci = lower_ci,
+  upper_ci = upper_ci
+)
 
-# Step 4: View results
-summary(model)
+# View the data frame
+print(average_ratings)
 ```
+
+```{r average_judge_rating}
+
+# Calculate average rating for each judge
+average_judge_rating <- chopped_long_filtered %>%
+  group_by(judge) %>%
+  summarise(avg_rating = mean(episode_rating, na.rm = TRUE))
+
+average_judge_rating$above_average <- ifelse(average_judge_rating$avg_rating > average_ratings$mean_x, "Above", "Below")
+```
+
+```{r plot}
+ggplot(average_judge_rating, aes(x = judge, y = avg_rating, label = judge, color=above_average)) +
+  geom_point(size = 2.5) +  # Plot the points
+  geom_text(
+    hjust = 0.5, vjust = -0.5,  # Adjust text position (centered horizontally, slightly above the point)
+    size = 3, color = "black"  # Reduce text size and set color
+  ) +
+  annotate("rect",
+           xmin = -Inf, xmax = Inf,
+           ymin = average_ratings$lower_ci, ymax = average_ratings$upper_ci,
+           alpha = 0.2, fill = "gray70") +  # Shaded confidence interval
+  # Add mean line
+  geom_hline(yintercept = average_ratings$mean_x, linetype = "dashed", color = "gray40") + 
+  annotate("text", x = 1, y = average_ratings$mean_x + 0.1, label = "Average Episode Rating", 
+           color = "gray20", size = 4, angle = 0, hjust = 0, vjust = 6) +
+ scale_color_manual(values = c("Above" = "blue", "Below" = "red")) +
+   theme_classic()+
+  theme(
+    axis.text.x = element_blank(),  # Remove x-axis labels
+    axis.ticks.x = element_blank(),
+    legend.position = "none")
+  
+```
+
+

@@ -13,7 +13,7 @@
 
 <title>Portfolio 9</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,217 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<p>This portfolio project is on the TidyTuesday dataset from august 25th
+2020 on the Chopped tv show.</p>
+<p>#libraries</p>
+<pre class="r"><code>library(tidyverse)</code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.5
+## ✔ forcats   1.0.0     ✔ stringr   1.5.1
+## ✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+## ✔ purrr     1.0.4     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(tidytuesdayR)</code></pre>
+<pre><code>## Warning: package &#39;tidytuesdayR&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(lme4)</code></pre>
+<pre><code>## Warning: package &#39;lme4&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Loading required package: Matrix
+## 
+## Attaching package: &#39;Matrix&#39;
+## 
+## The following objects are masked from &#39;package:tidyr&#39;:
+## 
+##     expand, pack, unpack</code></pre>
+<p>#data</p>
+<pre class="r"><code>chopped &lt;- readr::read_tsv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2020/2020-08-25/chopped.tsv&#39;)</code></pre>
+<pre><code>## Rows: 569 Columns: 21
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;\t&quot;
+## chr (17): episode_name, episode_notes, air_date, judge1, judge2, judge3, app...
+## dbl  (4): season, season_episode, series_episode, episode_rating
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>#long</p>
+<pre class="r"><code>chopped_long &lt;- chopped %&gt;%
+  pivot_longer(
+    cols = starts_with(&quot;judge&quot;),
+    names_to = &quot;judge_position&quot;,
+    values_to = &quot;judge&quot;
+  ) %&gt;%
+  mutate(judge = as.factor(judge))</code></pre>
+<p>#exploratory ##seasonrating</p>
+<pre class="r"><code>chopped %&gt;%
+  ggplot(aes(x = season, y = episode_rating)) +
+  geom_jitter(na.rm = TRUE) +
+  geom_smooth(method = &quot;lm&quot;, na.rm = TRUE) +
+  labs(title = &quot;Scatterplot of Season vs. Rating&quot;,
+       x = &quot;Season&quot;,
+       y = &quot;Rating&quot;) +
+  theme_minimal()</code></pre>
+<pre><code>## `geom_smooth()` using formula = &#39;y ~ x&#39;</code></pre>
+<p><img src="p09_files/figure-html/scatterplot_seasonrating-1.png" width="672" /></p>
+<p>#exploring judge_combos</p>
+<pre class="r"><code>chopped_with_combo &lt;- chopped %&gt;%
+  rowwise() %&gt;%
+  mutate(
+    judge_combo = paste(sort(c(judge1, judge2, judge3)), collapse = &quot; + &quot;)
+  ) %&gt;%
+  ungroup()
+
+combo_ratings &lt;- chopped_with_combo %&gt;%
+  group_by(judge_combo) %&gt;%
+  summarize(
+    avg_rating = mean(episode_rating, na.rm = TRUE),
+    n_episodes = n()
+  ) %&gt;%
+  filter(n_episodes &gt;= 2) %&gt;%
+  arrange(desc(avg_rating)) 
+   
+
+
+combo_ratings$judge_combo &lt;- as.factor(combo_ratings$judge_combo)</code></pre>
+<p>#tryingagain</p>
+<pre class="r"><code>judge_counts &lt;- chopped_long %&gt;%
+  group_by(judge) %&gt;%
+  summarise(episode_count = n())  # Count episodes per judge
+
+# Filter out judges who were in fewer than 3 episodes
+chopped_long_filtered &lt;- chopped_long %&gt;%
+  filter(judge %in% judge_counts$judge[judge_counts$episode_count &gt;= 4])
+
+# Preview the filtered data
+head(chopped_long_filtered)</code></pre>
+<pre><code>## # A tibble: 6 × 20
+##   season season_episode series_episode episode_rating episode_name episode_notes
+##    &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt;          &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;        
+## 1      1              1              1            9.2 Octopus, Du… This is the …
+## 2      1              1              1            9.2 Octopus, Du… This is the …
+## 3      1              1              1            9.2 Octopus, Du… This is the …
+## 4      1              2              2            8.8 Tofu, Blueb… This is the …
+## 5      1              2              2            8.8 Tofu, Blueb… This is the …
+## 6      1              2              2            8.8 Tofu, Blueb… This is the …
+## # ℹ 14 more variables: air_date &lt;chr&gt;, appetizer &lt;chr&gt;, entree &lt;chr&gt;,
+## #   dessert &lt;chr&gt;, contestant1 &lt;chr&gt;, contestant1_info &lt;chr&gt;,
+## #   contestant2 &lt;chr&gt;, contestant2_info &lt;chr&gt;, contestant3 &lt;chr&gt;,
+## #   contestant3_info &lt;chr&gt;, contestant4 &lt;chr&gt;, contestant4_info &lt;chr&gt;,
+## #   judge_position &lt;chr&gt;, judge &lt;fct&gt;</code></pre>
+<div id="section" class="section level1">
+<h1></h1>
+<pre class="r"><code>model &lt;- lmer(episode_rating ~ judge + (1 | season_episode), data = chopped_long_filtered)
+
+# Summary of the model
+summary(model)</code></pre>
+<pre><code>## Linear mixed model fit by REML [&#39;lmerMod&#39;]
+## Formula: episode_rating ~ judge + (1 | season_episode)
+##    Data: chopped_long_filtered
+## 
+## REML criterion at convergence: 1764.3
+## 
+## Scaled residuals: 
+##     Min      1Q  Median      3Q     Max 
+## -6.1004 -0.4604  0.2038  0.6738  1.7782 
+## 
+## Random effects:
+##  Groups         Name        Variance  Std.Dev.
+##  season_episode (Intercept) 0.0003335 0.01826 
+##  Residual                   0.2205451 0.46962 
+## Number of obs: 1300, groups:  season_episode, 20
+## 
+## Fixed effects:
+##                          Estimate Std. Error t value
+## (Intercept)              8.443177   0.141718  59.577
+## judgeAarón Sánchez      -0.040081   0.148306  -0.270
+## judgeAlex Guarnaschelli -0.018822   0.146007  -0.129
+## judgeAlex Stupak        -0.377246   0.253434  -1.489
+## judgeAlton Brown         0.314824   0.253390   1.242
+## judgeAmanda Freita      -0.087041   0.176351  -0.494
+## judgeAmanda Freitag     -0.050394   0.146573  -0.344
+## judgeAngie Mar           0.091963   0.306034   0.300
+## judgeChris Santo        -0.170895   0.154926  -1.103
+## judgeChris Santos       -0.096317   0.149849  -0.643
+## judgeChristian Petroni  -0.392673   0.274317  -1.431
+## judgeElizabeth Karmel   -0.223384   0.253388  -0.882
+## judgeGeoffrey Zakarian  -0.044973   0.146803  -0.306
+## judgeManeet Chauhan     -0.126417   0.149299  -0.847
+## judgeMarc Murphy        -0.006434   0.146530  -0.044
+## judgeMarcus Samuelsson  -0.050797   0.152987  -0.332
+## judgeMartha Stewart     -0.228106   0.218315  -1.045
+## judgeScott Conant       -0.070052   0.146246  -0.479
+## judgeSeamus Mullen       0.298364   0.274359   1.087
+## judgeTiffani Faison      0.453124   0.274360   1.652
+## judgeZakary Pelaccio    -0.114955   0.274342  -0.419</code></pre>
+<pre><code>## 
+## Correlation matrix not shown by default, as p = 21 &gt; 12.
+## Use print(x, correlation=TRUE)  or
+##     vcov(x)        if you need it</code></pre>
+<pre class="r"><code># Calculate average rating for all episodes
+x &lt;- chopped_long_filtered$episode_rating
+x &lt;- x[!is.na(x)]  # remove NAs
+
+n &lt;- length(x)
+mean_x &lt;- mean(x)
+sd_x &lt;- sd(x)
+se_x &lt;- sd_x / sqrt(n)
+ci &lt;- qt(0.975, df = n - 1) * se_x  # 95% CI
+
+# CI bounds
+lower_ci &lt;- mean_x - ci
+upper_ci &lt;- mean_x + ci
+
+# Print results
+mean_x</code></pre>
+<pre><code>## [1] 8.387615</code></pre>
+<pre class="r"><code>lower_ci</code></pre>
+<pre><code>## [1] 8.361981</code></pre>
+<pre class="r"><code>upper_ci</code></pre>
+<pre><code>## [1] 8.41325</code></pre>
+<pre class="r"><code>average_ratings &lt;- data.frame(
+  mean_x = mean_x,
+  lower_ci = lower_ci,
+  upper_ci = upper_ci
+)
+
+# View the data frame
+print(average_ratings)</code></pre>
+<pre><code>##     mean_x lower_ci upper_ci
+## 1 8.387615 8.361981  8.41325</code></pre>
+<pre class="r"><code># Calculate average rating for each judge
+average_judge_rating &lt;- chopped_long_filtered %&gt;%
+  group_by(judge) %&gt;%
+  summarise(avg_rating = mean(episode_rating, na.rm = TRUE))
+
+average_judge_rating$above_average &lt;- ifelse(average_judge_rating$avg_rating &gt; average_ratings$mean_x, &quot;Above&quot;, &quot;Below&quot;)</code></pre>
+<pre class="r"><code>ggplot(average_judge_rating, aes(x = judge, y = avg_rating, label = judge, color=above_average)) +
+  geom_point(size = 2.5) +  # Plot the points
+  geom_text(
+    hjust = 0.5, vjust = -0.5,  # Adjust text position (centered horizontally, slightly above the point)
+    size = 3, color = &quot;black&quot;  # Reduce text size and set color
+  ) +
+  annotate(&quot;rect&quot;,
+           xmin = -Inf, xmax = Inf,
+           ymin = average_ratings$lower_ci, ymax = average_ratings$upper_ci,
+           alpha = 0.2, fill = &quot;gray70&quot;) +  # Shaded confidence interval
+  # Add mean line
+  geom_hline(yintercept = average_ratings$mean_x, linetype = &quot;dashed&quot;, color = &quot;gray40&quot;) + 
+  annotate(&quot;text&quot;, x = 1, y = average_ratings$mean_x + 0.1, label = &quot;Average Episode Rating&quot;, 
+           color = &quot;gray20&quot;, size = 4, angle = 0, hjust = 0, vjust = 6) +
+ scale_color_manual(values = c(&quot;Above&quot; = &quot;blue&quot;, &quot;Below&quot; = &quot;red&quot;)) +
+   theme_classic()+
+  theme(
+    axis.text.x = element_blank(),  # Remove x-axis labels
+    axis.ticks.x = element_blank(),
+    legend.position = &quot;none&quot;)</code></pre>
+<p><img src="p09_files/figure-html/plot-1.png" width="672" /></p>
+</div>
 
 
 
