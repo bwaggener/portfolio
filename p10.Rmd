@@ -4,15 +4,47 @@ title: "Portfolio 10"
 
 For this portfolio I will be documenting my experiences with R as a red-green colorblind individual. 
 
-First, there are certain themes that make using R studio easier. Monokai is the best that I have tried so far. The contrast between the background and the blue text is better and it conveys the color information better than the default theme.
+Making plots and other information accessible to colorblind individuals is important because 8% of men are red-green collorblind (.5% of women and 4.5% of people overall) . This means that a significant portion of the population may have difficulty interpreting visual information that relies solely on color. Here are some suggestions for using R as a colorblind person and to make it more accessable for other colorblind people.
+
+#theme
+
+First, there are certain themes that make using R studio easier. Monokai is the best that I have tried so far. The contrast between the background and the blue text is better and it conveys the color information better than the default theme.The default theme is a bit too light and the colors are not as distinct for me. The Monokai theme has a darker background and the colors are more vibrant, which makes it easier to read the code.
 
 To change theme go to tools-> Global Options-> Appearance-> Editor Theme (pick one from the scroll down options)
 
+#colors palettes
 
+here is the default R color palettes (using the Brexit dataset from the class notes).
+```{r rcolor}
+library(tidyverse)
+library(tidytuesdayR)
+library(ggplot2)
 
+brexit <- read.csv("brexit.csv")
 
-```{r, child='p10/demo.Rmd'}
+ggplot(brexit, aes(y = region, fill = opinion)) +
+  geom_bar()
+
+ggplot(brexit, aes(y = opinion, fill = region)) +
+  geom_bar() +
+  facet_wrap(~region, nrow = 1)
 ```
 
+For the plot with only three colors, the colors are fairly distinguishable but not great and in the plot with five colors the pink (?) and blue are difficult to tell apart at a glance. 
 
+Here are the same plot with the viridis scale
+```{r brexitvirdis}
+library(viridis)
+
+ggplot(brexit, aes(y = region, fill = opinion)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE)
+
+ggplot(brexit, aes(y = opinion, fill = region)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  facet_wrap(~region, nrow = 1)
+```
+
+Using the viridis color palette, the plot with five colors is much easier to distinguish between colors for me. There is not much improvement for the three color plot. 
 
