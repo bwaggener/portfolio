@@ -2,7 +2,7 @@
 title: "Portfolio 10"
 ---
 
-For this portfolio I will be documenting my experiences with R as a red-green colorblind individual. 
+For this portfolio I will be documenting my experiences with R as a red-green colorblind individual. (also here's a good resource https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#:~:text=The%20package%20contains%20eight%20color,color%20map%20%2D%20%E2%80%9Cturbo%E2%80%9D.)
 
 Making plots and other information accessible to colorblind individuals is important because 8% of men are red-green collorblind (.5% of women and 4.5% of people overall) . This means that a significant portion of the population may have difficulty interpreting visual information that relies solely on color. Here are some suggestions for using R as a colorblind person and to make it more accessable for other colorblind people.
 
@@ -39,6 +39,11 @@ library(viridis)
 ggplot(brexit, aes(y = region, fill = opinion)) +
   geom_bar() +
   scale_fill_viridis(discrete = TRUE)
+
+ggplot(brexit, aes(y = opinion, fill = region)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  facet_wrap(~region, nrow = 1)
 
 ggplot(brexit, aes(y = opinion, fill = region)) +
   geom_bar() +
