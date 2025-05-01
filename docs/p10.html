@@ -348,7 +348,7 @@ ggplot(brexit, aes(y = region, fill = opinion)) +
 <p>For the plot with only three colors, the colors are fairly
 distinguishable but not great and in the plot with five colors the pink
 (?) and blue are difficult to tell apart at a glance.</p>
-<p>Here are the same plot with the viridis scale</p>
+<p>Here are the same plots with the viridis scale</p>
 <pre class="r"><code>library(viridis)</code></pre>
 <pre><code>## Warning: package &#39;viridis&#39; was built under R version 4.4.3</code></pre>
 <pre><code>## Loading required package: viridisLite</code></pre>
@@ -366,8 +366,10 @@ distinguishable but not great and in the plot with five colors the pink
   scale_fill_viridis(discrete = TRUE) +
   facet_wrap(~region, nrow = 1)</code></pre>
 <p><img src="p10_files/figure-html/brexitvirdis-3.png" width="672" /></p>
+<p>Using the viridis color palette, the plot with five colors is much
+easier to distinguish between colors for me. There is not much
+improvement for the three color plot.</p>
 <pre class="r"><code>library(ggplot2)
-library(viridis)
 library(RColorBrewer)
 library(patchwork)</code></pre>
 <pre><code>## Warning: package &#39;patchwork&#39; was built under R version 4.4.3</code></pre>
@@ -388,6 +390,7 @@ palettes &lt;- list(
 # note: scale object *first*, then name
 make_palette_plot &lt;- function(pal_scale, pal_name) {
   ggplot(brexit, aes(y = region, fill = opinion)) +
+    geom_bar()+
     pal_scale +
     ggtitle(pal_name) +
     theme_minimal() +
@@ -403,9 +406,8 @@ plots &lt;- purrr::map2(palettes, names(palettes), make_palette_plot)
 # and patchwork as before
 wrap_plots(plots, ncol = 2)</code></pre>
 <p><img src="p10_files/figure-html/colors1-1.png" width="672" /></p>
-<p>Using the viridis color palette, the plot with five colors is much
-easier to distinguish between colors for me. There is not much
-improvement for the three color plot.</p>
+<p>From these, the best ones for me are: Viridis inferno
+Brewerpaired</p>
 
 
 

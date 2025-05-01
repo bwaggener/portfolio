@@ -32,7 +32,7 @@ ggplot(brexit, aes(y = opinion, fill = region)) +
 
 For the plot with only three colors, the colors are fairly distinguishable but not great and in the plot with five colors the pink (?) and blue are difficult to tell apart at a glance. 
 
-Here are the same plot with the viridis scale
+Here are the same plots with the viridis scale
 ```{r brexitvirdis}
 library(viridis)
 
@@ -51,9 +51,10 @@ ggplot(brexit, aes(y = opinion, fill = region)) +
   facet_wrap(~region, nrow = 1)
 ```
 
+Using the viridis color palette, the plot with five colors is much easier to distinguish between colors for me. There is not much improvement for the three color plot. 
+
 ```{r colors1}
 library(ggplot2)
-library(viridis)
 library(RColorBrewer)
 library(patchwork)
 library(purrr)
@@ -73,6 +74,7 @@ palettes <- list(
 # note: scale object *first*, then name
 make_palette_plot <- function(pal_scale, pal_name) {
   ggplot(brexit, aes(y = region, fill = opinion)) +
+    geom_bar()+
     pal_scale +
     ggtitle(pal_name) +
     theme_minimal() +
@@ -89,5 +91,10 @@ plots <- purrr::map2(palettes, names(palettes), make_palette_plot)
 wrap_plots(plots, ncol = 2)
 ```
 
-Using the viridis color palette, the plot with five colors is much easier to distinguish between colors for me. There is not much improvement for the three color plot. 
+From these, the best ones for me are:
+Viridis
+inferno
+Brewerpaired
+
+
 
