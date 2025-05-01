@@ -358,10 +358,9 @@ and receive more sunlight and wind compared to understory trees that
 receive less sunlight compared to the canopy trees.</p>
 <p>#hypothesis</p>
 <p>Some hypotheses that I have are: 1 Canopy trees are taller than
-understory trees 2 Understory trees will have larger leaves in order to
-get more sun (not blade length) 3 <em>exploratory</em> understorey trees
-might have more defenses compared to canopy trees (stem or leaves being
-armed)</p>
+understory trees 2 Fruit type will be different between groups
+(conspicuousness) 3 <em>exploratory</em> understorey trees might have
+more defenses compared to canopy trees (stem or leaves being armed)</p>
 <p>#data_cleaning</p>
 <pre class="r"><code>palmtrees_clean &lt;- palmtrees %&gt;%
   filter(understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;))</code></pre>
@@ -398,11 +397,85 @@ armed)</p>
   theme_classic()</code></pre>
 <pre><code>## Warning: Removed 183 rows containing non-finite outside the scale range
 ## (`stat_ydensity()`).</code></pre>
-<p><img src="p04_files/figure-html/height_violin_plot-1.png" width="672" />
-##conclusion Yes, the canopy palms appear to be much taller compared to
-the understorey palms. On average they are 14.78904 to 16.41920 (95% CI)
-meters taller.</p>
-<p>#h_2_leaves ##t test</p>
+<p><img src="p04_files/figure-html/height_violin_plot-1.png" width="672" /></p>
+<p>##conclusion Yes, the canopy palms appear to be much taller compared
+to the understorey palms. On average they are 14.78904 to 16.41920 (95%
+CI) meters taller.</p>
+<p>#h_2_fruit ##testing_proportion</p>
+<pre class="r"><code>tbl &lt;- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$conspicuousness
+)
+prop.table(tbl, margin = 1)</code></pre>
+<pre><code>##              
+##               conspicuous   cryptic
+##   canopy        0.3505462 0.6494538
+##   understorey   0.4700855 0.5299145</code></pre>
+<pre class="r"><code>prop.test(
+  x = c(
+    tbl[&quot;canopy&quot;,      &quot;conspicuous&quot;],    # successes in canopy
+    tbl[&quot;understorey&quot;, &quot;conspicuous&quot;]     # successes in understory
+  ),
+  n = c(
+    sum(tbl[&quot;canopy&quot;, ]),                 # total canopy palms
+    sum(tbl[&quot;understorey&quot;, ])             # total understory palms
+  )
+)</code></pre>
+<pre><code>## 
+##  2-sample test for equality of proportions with continuity correction
+## 
+## data:  c(tbl[&quot;canopy&quot;, &quot;conspicuous&quot;], tbl[&quot;understorey&quot;, &quot;conspicuous&quot;]) out of c(sum(tbl[&quot;canopy&quot;, ]), sum(tbl[&quot;understorey&quot;, ]))
+## X-squared = 24.14, df = 1, p-value = 8.959e-07
+## alternative hypothesis: two.sided
+## 95 percent confidence interval:
+##  -0.16798814 -0.07109044
+## sample estimates:
+##    prop 1    prop 2 
+## 0.3505462 0.4700855</code></pre>
+<p>##bar_plot</p>
+<pre class="r"><code>palmtrees_clean %&gt;%
+  filter(
+    understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;),
+    !is.na(conspicuousness)
+  ) %&gt;%
+  ggplot(aes(x = understorey_canopy, fill = conspicuousness, na.rm = TRUE)) +
+  geom_bar(position = &quot;fill&quot;) +
+  scale_x_discrete(
+    name   = &quot;Understorey vs Canopy&quot;,          
+    labels = c(
+      canopy      = &quot;Canopy&quot;,
+      understorey = &quot;Understorey&quot;)) +
+  scale_fill_viridis_d(
+    name   = &quot;Conspicuousness&quot;,
+    labels = c(
+      conspicuous      = &quot;Conspicuous&quot;,
+      inconspicuous = &quot;Inconspicuous&quot;) ) +
+  labs( y = &quot;Proportion of Palms&quot;, 
+        title = &quot;Proportion of Conspicuousness of Canopy vs Understorey Palms&quot;) +
+  theme_classic()</code></pre>
+<p><img src="p04_files/figure-html/fruit_bar_plot-1.png" width="672" /></p>
+<p>##bar_plot_fruit_size</p>
+<pre class="r"><code>palmtrees_clean %&gt;%
+  filter(
+    understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;),
+    !is.na(fruit_size_categorical)
+  ) %&gt;%
+  ggplot(aes(x = understorey_canopy, fill = fruit_size_categorical, na.rm = TRUE)) +
+  geom_bar(position = &quot;fill&quot;) +
+  scale_x_discrete(
+    name   = &quot;Understorey vs Canopy&quot;,          
+    labels = c(
+      canopy      = &quot;Canopy&quot;,
+      understorey = &quot;Understorey&quot;)) +
+  scale_fill_viridis_d(
+    name   = &quot;Fruit Size&quot;,
+    labels = c(
+      conspicuous      = &quot;Conspicuous&quot;,
+      inconspicuous = &quot;Inconspicuous&quot;) ) +
+  labs( y = &quot;Proportion of Palms&quot;, 
+        title = &quot;Proportion of Fruit Size of Canopy vs Understorey Palms&quot;) +
+  theme_classic()</code></pre>
+<p><img src="p04_files/figure-html/barplotfruitsize-1.png" width="672" /></p>
 
 
 

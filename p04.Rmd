@@ -139,3 +139,10 @@ palmtrees_clean %>%
         title = "Proportion of Conspicuousness of Canopy vs Understorey Palms") +
   theme_classic()
 ```
+
+
+##conclusion
+
+There is a statistically significant difference in the proportion of conspicuous fruit between canopy and understorey palms. Understorey palms are more likely to have conspiciuous fruit--meaning they are brighter in color--compared to canopy palms who are more likely to have cryptic fruit--colors making them harder to see.
+
+This might be because understorey palms may be in darker environments, meaning that they need to have brighter colored fruit in order to disperse their seeds where bright colors are not as adventatgeous in the canopy regions. 
