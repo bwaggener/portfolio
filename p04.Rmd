@@ -49,7 +49,7 @@ Based on my exploratory results I want to create some good plot to tell a story 
 
 Quick googling showed me that canopy trees are those that are taller and receive more sunlight and wind compared to understory trees that receive less sunlight compared to the canopy trees.
 
-#hypothesis
+#hypotheses
 
 Some hypotheses that I have are:
 1 Canopy trees are taller than understory trees 
@@ -146,3 +146,46 @@ palmtrees_clean %>%
 There is a statistically significant difference in the proportion of conspicuous fruit between canopy and understorey palms. Understorey palms are more likely to have conspiciuous fruit--meaning they are brighter in color--compared to canopy palms who are more likely to have cryptic fruit--colors making them harder to see.
 
 This might be because understorey palms may be in darker environments, meaning that they need to have brighter colored fruit in order to disperse their seeds where bright colors are not as adventatgeous in the canopy regions. 
+
+#h_3_defense
+##proportions
+```{r palmdefensemeans}
+
+#stem
+tbl1 <- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$stem_armed)
+
+prop.table(tbl1, margin = 1)
+
+prop.test(
+  x = c(
+    tbl1["canopy",      "armed"],    
+    tbl1["understorey", "armed"]     
+  ),
+  n = c(
+    sum(tbl1["canopy", ]),           
+    sum(tbl1["understorey", ])       
+  )
+)
+
+
+#leaf
+tbl2 <- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$leaves_armed)
+
+prop.table(tbl2, margin = 1)
+
+prop.test(
+  x = c(
+    tbl2["canopy",      "armed"],    
+    tbl2["understorey", "armed"]     
+  ),
+  n = c(
+    sum(tbl2["canopy", ]),           
+    sum(tbl2["understorey", ])       
+  )
+)
+  
+```
