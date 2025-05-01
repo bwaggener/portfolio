@@ -189,3 +189,62 @@ prop.test(
 )
   
 ```
+##bar_plot
+```{r armedbarplot}
+palmtrees_clean %>%
+  filter(
+    understorey_canopy %in% c("canopy", "understorey"),
+    !is.na(leaves_armed)
+  ) %>%
+  ggplot(aes(x = understorey_canopy, fill = leaves_armed, na.rm = TRUE)) +
+  geom_bar(position = "fill") +
+  scale_x_discrete(
+    name   = "Understorey vs Canopy",          
+    labels = c(
+      canopy      = "Canopy",
+      understorey = "Understorey")) +
+  scale_fill_viridis_d(
+    name   = "Leaves Armed",
+    labels = c(
+      armed      = "Armed",
+      unarmed = "Unarmed") ) +
+  labs( y = "Proportion of Palms", 
+        title = "Proportion of Leaves Armed of Canopy vs Understorey Palms") +
+  theme_classic()
+```
+
+##violinplot_armedxheight
+```{r correlation}
+palmtrees_clean %>%
+  filter(
+    leaves_armed %in% c("armed", "non-armed"),
+    !is.na(max_stem_height_m)
+  ) %>%
+  
+  mutate(
+    leaves_armed = factor(leaves_armed, levels = c("non-armed","armed"))
+  ) %>%
+  ggplot(aes(
+    x    = leaves_armed,
+    y    = max_stem_height_m,
+    fill = leaves_armed
+  )) +
+    geom_violin(trim = FALSE) +
+    scale_x_discrete(
+      name   = "Leaves Armed",
+      labels = c("non-armed" = "Non-armed", "armed" = "Armed")
+    ) +
+    scale_fill_viridis_d(
+      name   = "Leaf Armour",
+      labels = c("Non-armed", "Armed")
+    ) +
+    labs(
+      y     = "Max Stem Height (m)",
+      title = "Distribution of Stem Height by Leaf Armament"
+    ) +
+    theme_classic()
+```
+
+##conclusion
+
+understorey palms seem to be more likely to have stem armour (p = .005) and leaf armour (p < .001). Leaf armour also is more common for shorter palms, supporting this hypothesis. 

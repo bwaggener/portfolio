@@ -356,7 +356,7 @@ tell a story about how canopy and understory palms differ.</p>
 <p>Quick googling showed me that canopy trees are those that are taller
 and receive more sunlight and wind compared to understory trees that
 receive less sunlight compared to the canopy trees.</p>
-<p>#hypothesis</p>
+<p>#hypotheses</p>
 <p>Some hypotheses that I have are: 1 Canopy trees are taller than
 understory trees 2 Fruit type will be different between groups
 (conspicuousness) 3 <em>exploratory</em> understorey trees might have
@@ -454,13 +454,86 @@ prop.table(tbl, margin = 1)</code></pre>
         title = &quot;Proportion of Conspicuousness of Canopy vs Understorey Palms&quot;) +
   theme_classic()</code></pre>
 <p><img src="p04_files/figure-html/fruit_bar_plot-1.png" width="672" /></p>
-<p>##bar_plot_fruit_size</p>
+<p>##conclusion</p>
+<p>There is a statistically significant difference in the proportion of
+conspicuous fruit between canopy and understorey palms. Understorey
+palms are more likely to have conspiciuous fruit–meaning they are
+brighter in color–compared to canopy palms who are more likely to have
+cryptic fruit–colors making them harder to see.</p>
+<p>This might be because understorey palms may be in darker
+environments, meaning that they need to have brighter colored fruit in
+order to disperse their seeds where bright colors are not as
+adventatgeous in the canopy regions.</p>
+<p>#h_3_defense ##proportions</p>
+<pre class="r"><code>#stem
+tbl1 &lt;- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$stem_armed)
+
+prop.table(tbl1, margin = 1)</code></pre>
+<pre><code>##              
+##                    armed  non-armed
+##   canopy      0.89684373 0.10315627
+##   understorey 0.93162393 0.06837607</code></pre>
+<pre class="r"><code>prop.test(
+  x = c(
+    tbl1[&quot;canopy&quot;,      &quot;armed&quot;],    
+    tbl1[&quot;understorey&quot;, &quot;armed&quot;]     
+  ),
+  n = c(
+    sum(tbl1[&quot;canopy&quot;, ]),           
+    sum(tbl1[&quot;understorey&quot;, ])       
+  )
+)</code></pre>
+<pre><code>## 
+##  2-sample test for equality of proportions with continuity correction
+## 
+## data:  c(tbl1[&quot;canopy&quot;, &quot;armed&quot;], tbl1[&quot;understorey&quot;, &quot;armed&quot;]) out of c(sum(tbl1[&quot;canopy&quot;, ]), sum(tbl1[&quot;understorey&quot;, ]))
+## X-squared = 7.7252, df = 1, p-value = 0.005446
+## alternative hypothesis: two.sided
+## 95 percent confidence interval:
+##  -0.05882992 -0.01073049
+## sample estimates:
+##    prop 1    prop 2 
+## 0.8968437 0.9316239</code></pre>
+<pre class="r"><code>#leaf
+tbl2 &lt;- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$leaves_armed)
+
+prop.table(tbl2, margin = 1)</code></pre>
+<pre><code>##              
+##                   armed non-armed
+##   canopy      0.4555133 0.5444867
+##   understorey 0.7139738 0.2860262</code></pre>
+<pre class="r"><code>prop.test(
+  x = c(
+    tbl2[&quot;canopy&quot;,      &quot;armed&quot;],    
+    tbl2[&quot;understorey&quot;, &quot;armed&quot;]     
+  ),
+  n = c(
+    sum(tbl2[&quot;canopy&quot;, ]),           
+    sum(tbl2[&quot;understorey&quot;, ])       
+  )
+)</code></pre>
+<pre><code>## 
+##  2-sample test for equality of proportions with continuity correction
+## 
+## data:  c(tbl2[&quot;canopy&quot;, &quot;armed&quot;], tbl2[&quot;understorey&quot;, &quot;armed&quot;]) out of c(sum(tbl2[&quot;canopy&quot;, ]), sum(tbl2[&quot;understorey&quot;, ]))
+## X-squared = 145.45, df = 1, p-value &lt; 2.2e-16
+## alternative hypothesis: two.sided
+## 95 percent confidence interval:
+##  -0.2991478 -0.2177731
+## sample estimates:
+##    prop 1    prop 2 
+## 0.4555133 0.7139738</code></pre>
+<p>##bar_plot</p>
 <pre class="r"><code>palmtrees_clean %&gt;%
   filter(
     understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;),
-    !is.na(fruit_size_categorical)
+    !is.na(leaves_armed)
   ) %&gt;%
-  ggplot(aes(x = understorey_canopy, fill = fruit_size_categorical, na.rm = TRUE)) +
+  ggplot(aes(x = understorey_canopy, fill = leaves_armed, na.rm = TRUE)) +
   geom_bar(position = &quot;fill&quot;) +
   scale_x_discrete(
     name   = &quot;Understorey vs Canopy&quot;,          
@@ -468,14 +541,48 @@ prop.table(tbl, margin = 1)</code></pre>
       canopy      = &quot;Canopy&quot;,
       understorey = &quot;Understorey&quot;)) +
   scale_fill_viridis_d(
-    name   = &quot;Fruit Size&quot;,
+    name   = &quot;Leaves Armed&quot;,
     labels = c(
-      conspicuous      = &quot;Conspicuous&quot;,
-      inconspicuous = &quot;Inconspicuous&quot;) ) +
+      armed      = &quot;Armed&quot;,
+      unarmed = &quot;Unarmed&quot;) ) +
   labs( y = &quot;Proportion of Palms&quot;, 
-        title = &quot;Proportion of Fruit Size of Canopy vs Understorey Palms&quot;) +
+        title = &quot;Proportion of Leaves Armed of Canopy vs Understorey Palms&quot;) +
   theme_classic()</code></pre>
-<p><img src="p04_files/figure-html/barplotfruitsize-1.png" width="672" /></p>
+<p><img src="p04_files/figure-html/armedbarplot-1.png" width="672" /></p>
+<p>##violinplot_armedxheight</p>
+<pre class="r"><code>palmtrees_clean %&gt;%
+  filter(
+    leaves_armed %in% c(&quot;armed&quot;, &quot;non-armed&quot;),
+    !is.na(max_stem_height_m)
+  ) %&gt;%
+  
+  mutate(
+    leaves_armed = factor(leaves_armed, levels = c(&quot;non-armed&quot;,&quot;armed&quot;))
+  ) %&gt;%
+  ggplot(aes(
+    x    = leaves_armed,
+    y    = max_stem_height_m,
+    fill = leaves_armed
+  )) +
+    geom_violin(trim = FALSE) +
+    scale_x_discrete(
+      name   = &quot;Leaves Armed&quot;,
+      labels = c(&quot;non-armed&quot; = &quot;Non-armed&quot;, &quot;armed&quot; = &quot;Armed&quot;)
+    ) +
+    scale_fill_viridis_d(
+      name   = &quot;Leaf Armour&quot;,
+      labels = c(&quot;Non-armed&quot;, &quot;Armed&quot;)
+    ) +
+    labs(
+      y     = &quot;Max Stem Height (m)&quot;,
+      title = &quot;Distribution of Stem Height by Leaf Armament&quot;
+    ) +
+    theme_classic()</code></pre>
+<p><img src="p04_files/figure-html/correlation-1.png" width="672" /></p>
+<p>##conclusion</p>
+<p>understorey palms seem to be more likely to have stem armour (p =
+.005) and leaf armour (p &lt; .001). Leaf armour also is more common for
+shorter palms, supporting this hypothesis.</p>
 
 
 
