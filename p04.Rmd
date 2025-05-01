@@ -53,7 +53,7 @@ Quick googling showed me that canopy trees are those that are taller and receive
 
 Some hypotheses that I have are:
 1 Canopy trees are taller than understory trees 
-2 Understory trees will have larger leaves in order to get more sun (not blade length)
+2 Fruit type will be different between groups (conspicuousness)
 3 *exploratory* understorey trees might have more defenses compared to canopy trees (stem or leaves being armed)
 
 #data_cleaning
@@ -90,4 +90,48 @@ palmtrees_clean %>%
         title = "Max Stem Height of Canopy vs Understorey Palms") +
   theme_classic()
   
+```
+
+##conclusion
+Yes, the canopy palms appear to be much taller compared to the understorey palms. On average they are 14.78904 to 16.41920 (95% CI) meters taller.
+
+#h_2_fruit
+##testing_proportion
+```{r conspiciousness}
+tbl <- table(
+  palmtrees_clean$understorey_canopy,
+  palmtrees_clean$conspicuousness
+)
+prop.table(tbl, margin = 1)
+
+prop.test(
+  x = c(
+    tbl["canopy",      "conspicuous"],    # successes in canopy
+    tbl["understorey", "conspicuous"]     # successes in understory
+  ),
+  n = c(
+    sum(tbl["canopy", ]),                 # total canopy palms
+    sum(tbl["understorey", ])             # total understory palms
+  )
+)
+```
+
+##bar_plot
+```{r fruit_bar_plot}
+palmtrees_clean %>%
+  ggplot(aes(x = understorey_canopy, fill = conspicuousness)) +
+  geom_bar(position = "fill") +
+  scale_x_discrete(
+    name   = "Understorey vs Canopy",          
+    labels = c(
+      canopy      = "Canopy",
+      understorey = "Understorey")) +
+  scale_fill_viridis_d(
+    name   = "Conspicuousness",
+    labels = c(
+      conspicuous      = "Conspicuous",
+      inconspicuous = "Inconspicuous") ) +
+  labs( y = "Proportion of Palms", 
+        title = "Proportion of Conspicuousness of Canopy vs Understorey Palms") +
+  theme_classic()
 ```

@@ -13,7 +13,7 @@
 
 <title>Portfolio 4</title>
 
-<script src="site_libs/header-attrs-2.13/header-attrs.js"></script>
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
@@ -141,11 +141,15 @@ $(document).ready(function () {
     href = "index.html";
   var menuAnchor = $('a[href="' + href + '"]');
 
-  // mark it active
-  menuAnchor.tab('show');
-
-  // if it's got a parent navbar menu mark it active as well
-  menuAnchor.closest('li.dropdown').addClass('active');
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
 
   // Navbar adjustments
   var navHeight = $(".navbar").first().height() + 15;
@@ -174,8 +178,8 @@ $(document).ready(function () {
   border-radius: 4px;
 }
 
-.tabset-dropdown > .nav-tabs > li.active:before {
-  content: "";
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
   font-family: 'Glyphicons Halflings';
   display: inline-block;
   padding: 10px;
@@ -183,16 +187,9 @@ $(document).ready(function () {
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
-  content: "&#xe258;";
-  border: none;
-}
-
-.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
-  content: "";
+  content: "\e258";
   font-family: 'Glyphicons Halflings';
-  display: inline-block;
-  padding: 10px;
-  border-right: 1px solid #ddd;
+  border: none;
 }
 
 .tabset-dropdown > .nav-tabs > li.active {
@@ -298,13 +295,114 @@ $(document).ready(function () {
 </div>
 
 
-<blockquote>
-<p>The projects should be numbered consecutively (i.e., in the order in
-which you began them), and should include for each project a description
-of the goal, the product (computer program, hand graph, computer graph,
-etc.), the data, and some interpretation. Reports must be reproducible
-and of high quality in terms of writing, grammar, presentation, etc.</p>
-</blockquote>
+<pre class="r"><code>library(tidyverse) </code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(ggplot2)
+library(viridis)</code></pre>
+<pre><code>## Warning: package &#39;viridis&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>palmtrees &lt;- readr::read_csv(&#39;https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-03-18/palmtrees.csv&#39;)</code></pre>
+<pre><code>## Rows: 2557 Columns: 29
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (17): spec_name, acc_genus, acc_species, palm_tribe, palm_subfamily, cli...
+## dbl (12): max_stem_height_m, max_stem_dia_cm, max_leaf_number, max__blade__l...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<p>exploratory graphs looking at the data</p>
+<pre class="r"><code>palmtrees %&gt;%
+  ggplot(aes(x = max_stem_height_m)) +
+  geom_histogram()</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 446 rows containing non-finite outside the scale range
+## (`stat_bin()`).</code></pre>
+<p><img src="p04_files/figure-html/summarystats-1.png" width="672" /></p>
+<pre class="r"><code>  palmtrees %&gt;%
+    ggplot(aes(x = max_stem_height_m)) +
+  geom_histogram()+
+  facet_wrap(~palm_subfamily)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 446 rows containing non-finite outside the scale range
+## (`stat_bin()`).</code></pre>
+<p><img src="p04_files/figure-html/summarystats-2.png" width="672" /></p>
+<pre class="r"><code>  palmtrees %&gt;%
+    ggplot(aes(x = max_stem_height_m)) +
+  geom_histogram()+
+  facet_wrap(~fruit_shape)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 446 rows containing non-finite outside the scale range
+## (`stat_bin()`).</code></pre>
+<p><img src="p04_files/figure-html/summarystats-3.png" width="672" /></p>
+<pre class="r"><code>   palmtrees %&gt;%
+    ggplot(aes(x = max_leaf_number)) +
+  geom_histogram()+
+  facet_wrap(~understorey_canopy)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 1251 rows containing non-finite outside the scale range
+## (`stat_bin()`).</code></pre>
+<p><img src="p04_files/figure-html/summarystats-4.png" width="672" /></p>
+<pre class="r"><code>palmtrees %&gt;%
+    ggplot(aes(x = max__blade__length_m)) +
+  geom_histogram()+
+  facet_wrap(~understorey_canopy)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<pre><code>## Warning: Removed 659 rows containing non-finite outside the scale range
+## (`stat_bin()`).</code></pre>
+<p><img src="p04_files/figure-html/summarystats-5.png" width="672" /></p>
+<p>Based on my exploratory results I want to create some good plot to
+tell a story about how canopy and understory palms differ.</p>
+<p>Quick googling showed me that canopy trees are those that are taller
+and receive more sunlight and wind compared to understory trees that
+receive less sunlight compared to the canopy trees.</p>
+<p>#hypothesis</p>
+<p>Some hypotheses that I have are: 1 Canopy trees are taller than
+understory trees 2 Understory trees will have larger leaves in order to
+get more sun (not blade length) 3 <em>exploratory</em> understorey trees
+might have more defenses compared to canopy trees (stem or leaves being
+armed)</p>
+<p>#data_cleaning</p>
+<pre class="r"><code>palmtrees_clean &lt;- palmtrees %&gt;%
+  filter(understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;))</code></pre>
+<p>#h_1_taller ##t test</p>
+<pre class="r"><code>palmtrees_clean %&gt;%
+  t.test(max_stem_height_m ~ understorey_canopy, data = .)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  max_stem_height_m by understorey_canopy
+## t = 37.56, df = 1197.6, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means between group canopy and group understorey is not equal to 0
+## 95 percent confidence interval:
+##  14.78904 16.41920
+## sample estimates:
+##      mean in group canopy mean in group understorey 
+##                 17.875108                  2.270985</code></pre>
+<p>##violin_plot</p>
+<pre class="r"><code>palmtrees_clean %&gt;%
+  ggplot(aes(x = understorey_canopy, y = max_stem_height_m, fill = understorey_canopy)) +
+  geom_violin() +
+   scale_x_discrete(
+    name   = &quot;Understorey vs Canopy&quot;,          
+    labels = c(
+      canopy      = &quot;Canopy&quot;,
+      understorey = &quot;Understorey&quot;)) +
+  scale_fill_viridis_d(
+    name   = &quot;Type of Palm&quot;,
+    labels = c(
+      canopy      = &quot;Canopy&quot;,
+      understorey = &quot;Understorey&quot;) ) +
+  labs( y = &quot;Max Stem Height (m)&quot;, 
+        title = &quot;Max Stem Height of Canopy vs Understorey Palms&quot;) +
+  theme_classic()</code></pre>
+<pre><code>## Warning: Removed 183 rows containing non-finite outside the scale range
+## (`stat_ydensity()`).</code></pre>
+<p><img src="p04_files/figure-html/height_violin_plot-1.png" width="672" />
+##conclusion Yes, the canopy palms appear to be much taller compared to
+the understorey palms. On average they are 14.78904 to 16.41920 (95% CI)
+meters taller.</p>
+<p>#h_2_leaves ##t test</p>
 
 
 
