@@ -296,7 +296,9 @@ $(document).ready(function () {
 
 
 <p>For this portfolio I will be documenting my experiences with R as a
-red-green colorblind individual.</p>
+red-green colorblind individual. (also here’s a good resource <a
+href="https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#"
+class="uri">https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html#</a>:~:text=The%20package%20contains%20eight%20color,color%20map%20%2D%20%E2%80%9Cturbo%E2%80%9D.)</p>
 <p>Making plots and other information accessible to colorblind
 individuals is important because 8% of men are red-green collorblind
 (.5% of women and 4.5% of people overall) . This means that a
@@ -342,10 +344,10 @@ ggplot(brexit, aes(y = region, fill = opinion)) +
 <pre class="r"><code>ggplot(brexit, aes(y = opinion, fill = region)) +
   geom_bar() +
   facet_wrap(~region, nrow = 1)</code></pre>
-<p><img src="p10_files/figure-html/rcolor-2.png" width="672" /> For the
-plot with only three colors, the colors are fairly distinguishable but
-not great and in the plot with five colors the pink (?) and blue are
-difficult to tell apart at a glance.</p>
+<p><img src="p10_files/figure-html/rcolor-2.png" width="672" /></p>
+<p>For the plot with only three colors, the colors are fairly
+distinguishable but not great and in the plot with five colors the pink
+(?) and blue are difficult to tell apart at a glance.</p>
 <p>Here are the same plot with the viridis scale</p>
 <pre class="r"><code>library(viridis)</code></pre>
 <pre><code>## Warning: package &#39;viridis&#39; was built under R version 4.4.3</code></pre>
@@ -359,8 +361,51 @@ difficult to tell apart at a glance.</p>
   scale_fill_viridis(discrete = TRUE) +
   facet_wrap(~region, nrow = 1)</code></pre>
 <p><img src="p10_files/figure-html/brexitvirdis-2.png" width="672" /></p>
+<pre class="r"><code>ggplot(brexit, aes(y = opinion, fill = region)) +
+  geom_bar() +
+  scale_fill_viridis(discrete = TRUE) +
+  facet_wrap(~region, nrow = 1)</code></pre>
+<p><img src="p10_files/figure-html/brexitvirdis-3.png" width="672" /></p>
+<pre class="r"><code>library(ggplot2)
+library(viridis)
+library(RColorBrewer)
+library(patchwork)</code></pre>
+<pre><code>## Warning: package &#39;patchwork&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(purrr)
+
+# your palette list (same as before)
+palettes &lt;- list(
+  viridis     = scale_fill_viridis_d(option = &quot;D&quot;),
+  magma       = scale_fill_viridis_d(option = &quot;A&quot;),
+  inferno     = scale_fill_viridis_d(option = &quot;C&quot;),
+  plasma      = scale_fill_viridis_d(option = &quot;B&quot;),
+  cividis     = scale_fill_viridis_d(option = &quot;E&quot;),
+  brewerSet2  = scale_fill_brewer(palette = &quot;Set2&quot;),
+  brewerPaired= scale_fill_brewer(palette = &quot;Paired&quot;),
+  hue         = scale_fill_hue()
+)
+
+# note: scale object *first*, then name
+make_palette_plot &lt;- function(pal_scale, pal_name) {
+  ggplot(brexit, aes(y = region, fill = opinion)) +
+    pal_scale +
+    ggtitle(pal_name) +
+    theme_minimal() +
+    theme(
+      plot.title     = element_text(size = 10, face = &quot;bold&quot;),
+      legend.position = &quot;none&quot;
+    )
+}
+
+# now map2(palettes, names(palettes), ...) will pass (scale, name)
+plots &lt;- purrr::map2(palettes, names(palettes), make_palette_plot)
+
+# and patchwork as before
+wrap_plots(plots, ncol = 2)</code></pre>
+<p><img src="p10_files/figure-html/colors1-1.png" width="672" /></p>
 <p>Using the viridis color palette, the plot with five colors is much
-easier to distinguish between colors for me.</p>
+easier to distinguish between colors for me. There is not much
+improvement for the three color plot.</p>
 
 
 
