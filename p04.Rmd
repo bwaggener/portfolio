@@ -119,7 +119,11 @@ prop.test(
 ##bar_plot
 ```{r fruit_bar_plot}
 palmtrees_clean %>%
-  ggplot(aes(x = understorey_canopy, fill = conspicuousness)) +
+  filter(
+    understorey_canopy %in% c("canopy", "understorey"),
+    !is.na(conspicuousness)
+  ) %>%
+  ggplot(aes(x = understorey_canopy, fill = conspicuousness, na.rm = TRUE)) +
   geom_bar(position = "fill") +
   scale_x_discrete(
     name   = "Understorey vs Canopy",          
