@@ -297,8 +297,11 @@ $(document).ready(function () {
 
 <p>The goal of this is to take my cleaned data and make 1 graph based on
 the means and se of the data.</p>
-<pre class="r"><code>library(tidyverse) 
-library(tidyr)
+<pre class="r"><code>library(tidyverse) </code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(tidyr)
 library(ggplot2)</code></pre>
 <p>This repeats what I did in portfolio 1.</p>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
@@ -409,8 +412,8 @@ conservatives).</p>
     y = &quot;Ideal Society Ratings&quot;,
     color = &quot;Political Orientation&quot;) +
   theme_minimal()</code></pre>
-<p><img src="p02_files/figure-html/scatterplot-1.png" width="672" />
-Eventually, I will be making two graphs for each society type for my
+<p><img src="p02_files/figure-html/scatterplot-1.png" width="672" /></p>
+<p>Eventually, I will be making two graphs for each society type for my
 thesis project. One graph will be the society that violates conservative
 values (nontraditional family values) at two levels of happiness. The
 other will not violate conservative values (traditional family values)
