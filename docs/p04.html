@@ -351,16 +351,18 @@ library(viridis)</code></pre>
 <pre><code>## Warning: Removed 659 rows containing non-finite outside the scale range
 ## (`stat_bin()`).</code></pre>
 <p><img src="p04_files/figure-html/summarystats-5.png" width="672" /></p>
-<p>Based on my exploratory results I want to create some good plot to
-tell a story about how canopy and understory palms differ.</p>
+<p>Based on my exploratory results I want to create some good plots and
+statistical analyses to tell a story about how canopy and understory
+palms differ.</p>
 <p>Quick googling showed me that canopy trees are those that are taller
 and receive more sunlight and wind compared to understory trees that
 receive less sunlight compared to the canopy trees.</p>
 <p>#hypotheses</p>
 <p>Some hypotheses that I have are: 1 Canopy trees are taller than
-understory trees 2 Fruit type will be different between groups
-(conspicuousness) 3 <em>exploratory</em> understorey trees might have
-more defenses compared to canopy trees (stem or leaves being armed)</p>
+understory trees (obvious but should be tested as a sanity check) 2
+Fruit type will be different between groups (conspicuousness) 3
+understorey trees might have more defenses compared to canopy trees
+(stem or leaves being armed)</p>
 <p>#data_cleaning</p>
 <pre class="r"><code>palmtrees_clean &lt;- palmtrees %&gt;%
   filter(understorey_canopy %in% c(&quot;canopy&quot;, &quot;understorey&quot;))</code></pre>
@@ -413,12 +415,12 @@ prop.table(tbl, margin = 1)</code></pre>
 ##   understorey   0.4700855 0.5299145</code></pre>
 <pre class="r"><code>prop.test(
   x = c(
-    tbl[&quot;canopy&quot;,      &quot;conspicuous&quot;],    # successes in canopy
-    tbl[&quot;understorey&quot;, &quot;conspicuous&quot;]     # successes in understory
+    tbl[&quot;canopy&quot;,      &quot;conspicuous&quot;],    
+    tbl[&quot;understorey&quot;, &quot;conspicuous&quot;]     
   ),
   n = c(
-    sum(tbl[&quot;canopy&quot;, ]),                 # total canopy palms
-    sum(tbl[&quot;understorey&quot;, ])             # total understory palms
+    sum(tbl[&quot;canopy&quot;, ]),                 
+    sum(tbl[&quot;understorey&quot;, ])             
   )
 )</code></pre>
 <pre><code>## 
@@ -459,7 +461,7 @@ prop.table(tbl, margin = 1)</code></pre>
 conspicuous fruit between canopy and understorey palms. Understorey
 palms are more likely to have conspiciuous fruit–meaning they are
 brighter in color–compared to canopy palms who are more likely to have
-cryptic fruit–colors making them harder to see.</p>
+cryptic fruit–fruit that have colors that are harder to see.</p>
 <p>This might be because understorey palms may be in darker
 environments, meaning that they need to have brighter colored fruit in
 order to disperse their seeds where bright colors are not as
