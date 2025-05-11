@@ -296,13 +296,17 @@ $(document).ready(function () {
 
 
 <p>The goal of this project is to run a regression analysis on pilot
-data i collected for my thesis project. And make a visualization</p>
+data i collected for my thesis project. This is practice for how I will
+run my full dataset once I collect my responses.</p>
 <pre class="r"><code>library(tidyverse) </code></pre>
+<pre><code>## Warning: package &#39;tidyverse&#39; was built under R version 4.4.3</code></pre>
+<pre><code>## Warning: package &#39;ggplot2&#39; was built under R version 4.4.3</code></pre>
 <pre><code>## Warning: package &#39;purrr&#39; was built under R version 4.4.3</code></pre>
 <pre class="r"><code>library(tidyr)
 library(dplyr)
-library(lme4)
-library(lmerTest)</code></pre>
+library(lme4)</code></pre>
+<pre><code>## Warning: package &#39;lme4&#39; was built under R version 4.4.3</code></pre>
+<pre class="r"><code>library(lmerTest)</code></pre>
 <p>Same process i did from portfolio 1 and 2.</p>
 <pre class="r"><code>ideal_society &lt;- read.csv(&quot;C:\\Users\\Ben\\OneDrive\\Documents\\01Wake Forest\\2025SpringDataScience\\IdealSocietyData\\RRRPILOT_IdealSocietiesConservative Values_February 10, 2025_07.27.csv&quot;)
 
@@ -360,6 +364,9 @@ societies).</p>
 political orientation measures. I am doing this to later average them
 and create a composite political orientation score. I need to z_score
 them because they are on different scales.</p>
+<p>First, I convert the variables to numeric so that I can zscore
+them.</p>
+<p>“Scale” is a function that zscores data.</p>
 <pre class="r"><code>ideal_society_simplified$Q2 &lt;- as.numeric(ideal_society_simplified$Q2)
 ideal_society_simplified$Q26 &lt;- as.numeric(ideal_society_simplified$Q26)
 ideal_society_simplified$Q27 &lt;- as.numeric(ideal_society_simplified$Q27)
@@ -397,10 +404,10 @@ mutate(Subject = row_number())</code></pre>
 societies so that those with nontraditional family values (LF) are coded
 as 0 and traditional family values (HF) are coded as 1. I did the same
 for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the
-society types, 0 is coded as the one that might violate conservative
-values.Also conservatives are larger scores on the political orientation
-measure (i.e. 1 would be more conservative than -.4 which would be more
-liberal).</p>
+society types, 0 is coded as the society type that might violate
+conservative values. Also conservatives are larger scores on the
+political orientation measure (e.g., 1 would be more conservative than
+-1.4 which would be more liberal).</p>
 <pre class="r"><code>long_ideal_society &lt;- ideal_society_avrgpoli %&gt;%
  pivot_longer(
     cols = c(LFLH, LFHH, HFLH, HFHH, LRLH, LRHH, HRLH, HRHH),

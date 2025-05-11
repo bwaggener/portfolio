@@ -128,7 +128,7 @@ ideal_society_avrgpoli <- ideal_society_avrgpoli %>%
 mutate(Subject = row_number())
 ```
 
-Here i transformed the data from wide to long and re-coded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the one that might violate conservative values.Also conservatives are larger scores on the political orientation measure (e.g., 1 would be more conservative than -.4 which would be more liberal).
+Here i transformed the data from wide to long and re-coded the societies so that those with nontraditional family values (LF) are coded as 0 and traditional family values (HF) are coded as 1. I did the same for religion (LR = 0, HR = 1) and happiness (LH = 0, HH = 1). For the society types, 0 is coded as the society type that might violate conservative values. Also conservatives are larger scores on the political orientation measure (e.g., 1 would be more conservative than -1.4 which would be more liberal).
 
 ```{r pivotandrecode}
 long_ideal_society <- ideal_society_avrgpoli %>%
